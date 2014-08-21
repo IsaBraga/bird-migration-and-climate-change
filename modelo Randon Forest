@@ -7,6 +7,7 @@ library(maptools)
 library (maps)
 library (raster)
 library (rgdal)
+library (sp)
 library(rgeos)
 library (sqldf)
 library (tcltk2)
@@ -33,7 +34,7 @@ for(i in 1:length(coord_spp)){
                                       models = 'RF',
                                       models.options = myBiomodOption,
                                       NbRunEval=3,
-                                      DataSplit=80,
+                                      DataSplit=100,
                                       Prevalence=0.5,
                                       VarImport=3,
                                       models.eval.meth = 'TSS',
@@ -43,9 +44,9 @@ for(i in 1:length(coord_spp)){
                                       modeling.id = myExpl@filename )
   
   #salvar os valores das avaliacoes
-  capture.output(get_evaluations(myBiomodModelOut),
-                 file=file.path(myBiomodModelOut@sp.name,
-                                paste(myRespName, "_formal_models_evaluation.txt", sep="")))
+  # capture.output(get_evaluations(myBiomodModelOut),
+  #               file=file.path(myBiomodModelOut@sp.name,
+  #                              paste(myRespName, "_formal_models_evaluation.txt", sep="")))
   
   #salvar a importancia das variaveis explanatorias
   capture.output(get_variables_importance(myBiomodModelOut),
@@ -90,7 +91,23 @@ for(i in 1:length(coord_spp)){
   
   #cortar, reclassificar e calcular midpoint
   myBiomodEF_points<-mask(myBiomodEF@proj@val, neotropical)
-  reclas<-reclassify (myBiomodEF_points, c(-Inf, 600, 0, 600, Inf, 1))
+  reclas<-reclassify (myBiomodEF_points, c(-Inf, xxx, 0, xxx, Inf, 1))
+  
+  # validation with polygons
+
+  poly_sp<- readShapePoly (...)
+  r_spp <- raster(extent(poly_sp))
+  res(r_spp)=0.05
+  r_spp <- rasterize(poly_sp, field="", r_spp)
+  
+  plot (r_spp)
+  
+  r_spp_reclas<- reclassify (r_spp, c(-Inf, 1, 0, 1, +Inf, 2)
+  test<- r_spp_reclass + reclas
+  ## number of pixels with 3 / number of pixels with 3 + number of pixels with 2 == sensitivity
+  ## number of pixels with 1 / number of pixels with 2 + number of pixels with 1 == specificity
+  
+
     
   reclas_points<- rasterToPoints(reclas)
   write.table(reclas_points, file=paste(myRespName, "reclasPoints.txt", sep="_"), quote=F, col.names=T, row.names=F)
