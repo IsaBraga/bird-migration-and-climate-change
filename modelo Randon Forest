@@ -107,7 +107,7 @@ for(i in 1:length(coord_spp)){
   ## number of pixels with 3 / number of pixels with 3 + number of pixels with 2 == sensitivity
   ## number of pixels with 1 / number of pixels with 2 + number of pixels with 1 == specificity
   
-
+  TSS<- (sensitiviy + specificity) - 1
     
   reclas_points<- rasterToPoints(reclas)
   write.table(reclas_points, file=paste(myRespName, "reclasPoints.txt", sep="_"), quote=F, col.names=T, row.names=F)
