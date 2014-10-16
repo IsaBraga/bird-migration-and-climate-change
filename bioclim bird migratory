@@ -3,7 +3,6 @@ library (raster)
 library (dismo)
 library (rgdal)
 library (maptools)
-library(maps)
 library(outliers)
 
 
@@ -26,19 +25,15 @@ colnames(resul)<-c("spp","xmin","ymin","xmax","ymax","midpointx", "midpointy","a
 
 run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   for(i in 1:length(shapes)){
-    paxaro<- readShapePoly (shapes[1])
+    paxaro<- readShapePoly (shapes[i])
   
-  #guardar o nome da spp e rcp
-    resul[1,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","REP", sep="")
-    resul[1+1,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","INV", sep="")  
-    
   for(j in 1:length(clima_rep)){
-    clima_reproducao<-brick(clima_rep[1])
-    clima_invernada<-brick(clima_inv[1])
+    clima_reproducao<-brick(clima_rep[i])
+    clima_invernada<-brick(clima_inv[i])
   
-    #guardar o nome do AOGCMs
-    resul[1,9]<-gsub(".grd", "", clima_rep[1])
-    resul[1+1,9]<-gsub(".grd", "", clima_inv[1])
+ #guardar o nome do AOGCMs
+  resul[i,9]<-gsub(".grd", "", clima_rep[i])
+  resul[i+1,9]<-gsub(".grd", "", clima_inv[i])
   
   reproduccion<- paxaro [paxaro$SEASONAL==2|paxaro$SEASONAL==1,]
   invernada<- paxaro [paxaro$SEASONAL==3|paxaro$SEASONAL==1,]
@@ -50,21 +45,24 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   nicho_rep<-rbind(as.data.frame(nicho_repro[1]), as.data.frame(nicho_repro[2]))
     
   
-  #modelo area de reproducao
+  ###modelo area de reproducao###
+  
+  #guardar o nome da spp e rcp
+  resul[i,1]<-paste(gsub(".shp", "", shapes[i]), "_", "0k","REP", sep="")
+  
   outlier_rep1 <- outlier(nicho_rep[,1],logical=TRUE) #outliers sao marcados como TRUE
   outlier_rep2 <- outlier(nicho_rep[,2],logical=TRUE)
   outlier_rep3 <- outlier(nicho_rep[,3],logical=TRUE)
   outlier_rep4 <- outlier(nicho_rep[,4],logical=TRUE)
   
   find_outlier1<- which(outlier_rep1==TRUE)
-  find_outlier2<- which(outlier_rep2==TRUE)  #esses dois vetores não deveriam ter tamanhos diferentes?
+  find_outlier2<- which(outlier_rep2==TRUE)  
   find_outlier3<- which(outlier_rep3==TRUE)
   find_outlier4<- which(outlier_rep4==TRUE)
     
   data_new_rep <- nicho_rep[-c(find_outlier1, find_outlier2, find_outlier3, find_outlier4),]
   data_new_inv <- nicho_inv[-c(find_outlier5, find_outlier6, find_outlier7, find_outlier8),]
   
-  #modelo area reproducao
   minmax_rep<- NULL
   for (i in 1:dim (data_new_rep)[2])
   {
@@ -98,19 +96,19 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
     rep_model_point<-rasterToPoints(rep_model)
     rep_model_point<-rep_model_point[rep_model_point[,3]==1,c(1:2)]
-    resul[1,c(2:5)]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
+    resul[i,c(2:5)]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
    
   #guardar o resultado da area do modelo
-    resul[1,8]<-stat_model$area[2]
+    resul[i,8]<-stat_model$area[2]
   #guardar o resultado da performance do modelo
-    resul[1,10]<-stat_validate$area[2] / stat_repro$area #porcentagem do shape original foi predito corretamente
+    resul[i,10]<-stat_validate$area[2] / stat_repro$area #porcentagem do shape original foi predito corretamente
   #calculo do media geometrica da area de reproducao e guardar o resultado
-    resul[1,c(6,7)]<- ((apply(rep_model_point, 2, max)-apply(rep_model_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
+    resul[i,c(6,7)]<- ((apply(rep_model_point, 2, max)-apply(rep_model_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
     
   
   #predict rcp 26    
     #nome da spp e rcp
-    resul[1+2,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","REP", sep="")
+    resul[i+2,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","REP", sep="")
       
   map3<- reclassify (clima_reproducao[[5]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
@@ -130,20 +128,22 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
   rep_model26_point<-rasterToPoints(rep_model26)
   rep_model26_point<-rep_model26_point[rep_model26_point[,3]==1,c(1:2)]
-  resul[1+2,c(2:5)]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
+  resul[i+2,c(2:5)]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
   
   #guardar o resultado da area do modelo
-  resul[1+2,8]<-stat_model26$area[2]
+  resul[i+2,8]<-stat_model26$area[2]
+  
   #guardar o resultado da performance do modelo
-  resul[1+2,10]<-#naõ sei oq usar aqui
+  resul[i+2,10]<-#naõ sei oq usar aqui
+  
   #calculo do media geometrica da area de reproducao e guardar o resultado
-  resul[1+2,c(6,7)]<- ((apply(rep_model26_point, 2, max)-apply(rep_model26_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
+  resul[i+2,c(6,7)]<- ((apply(rep_model26_point, 2, max)-apply(rep_model26_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
   
     
     
   #predict rcp 85
   #nome da spp e rcp
-  resul[1+4,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","REP", sep="")
+  resul[i+4,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","REP", sep="")
  
   map5<- reclassify (clima_reproducao[[9]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
@@ -163,26 +163,28 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
   rep_model85_point<-rasterToPoints(rep_model85)
   rep_model85_point<-rep_model85_point[rep_model85_point[,3]==1,c(1:2)]
-  resul[1+4,c(2:5)]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
+  resul[i+4,c(2:5)]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
   
   #guardar o resultado da area do modelo
-  resul[1+4,8]<-stat_model85$area[2]
+  resul[i+4,8]<-stat_model85$area[2]
   #guardar o resultado da performance do modelo
-  resul[1+4,10]<-#naõ sei oq usar aqui
+  resul[i+4,10]<-#naõ sei oq usar aqui
   #calculo do media geometrica da area de reproducao e guardar o resultado
-  resul[1+4,c(6,7)]<- ((apply(rep_model85_point, 2, max)-apply(rep_model85_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
-  
-    
+  resul[i+4,c(6,7)]<- ((apply(rep_model85_point, 2, max)-apply(rep_model85_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
   
   
-  #modelo area de invernada
+  ###modelo area de invernada###
+  
+  #guardar o nome da spp e o rcp
+  resul[i+1,1]<-paste(gsub(".shp", "", shapes[i]), "_", "0k","INV", sep="")  
+  
   outlier_inv1 <- outlier(nicho_inv[,1],logical=TRUE) #outliers sao marcados como TRUE
   outlier_inv2 <- outlier(nicho_inv[,2],logical=TRUE)
   outlier_inv3 <- outlier(nicho_inv[,3],logical=TRUE)
   outlier_inv4 <- outlier(nicho_inv[,4],logical=TRUE)
   
   find_outlier5<- which(outlier_inv1==TRUE)
-  find_outlier6<- which(outlier_inv2==TRUE)  #esses dois vetores não deveriam ter tamanhos diferentes?
+  find_outlier6<- which(outlier_inv2==TRUE) 
   find_outlier7<- which(outlier_inv3==TRUE)
   find_outlier8<- which(outlier_inv4==TRUE)
   
@@ -219,19 +221,19 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
   inv_model_point<-rasterToPoints(inv_model)
   inv_model_point<-inv_model_point[inv_model_point[,3]==1,c(1:2)]
-  resul[1,c(2:5)]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
+  resul[i+1,c(2:5)]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
   
   #guardar o resultado da area do modelo
-  resul[1,8]<-stat_modelInv$area[2]
+  resul[i+1,8]<-stat_modelInv$area[2]
   #guardar o resultado da performance do modelo
-  resul[1,10]<-stat_validateInv$area[2] / stat_inv$area #porcentagem do shape original foi predito corretamente
+  resul[i,10]<-stat_validateInv$area[2] / stat_inv$area #porcentagem do shape original foi predito corretamente
   #calculo do media geometrica da area de invroducao e guardar o resultado
-  resul[1,c(6,7)]<- ((apply(inv_model_point, 2, max)-apply(inv_model_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
+  resul[i+1,c(6,7)]<- ((apply(inv_model_point, 2, max)-apply(inv_model_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
   
   
   #predict rcp 26    
   #nome da spp e rcp 
-  resul[1+3,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","INV", sep="") 
+  resul[i+3,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","INV", sep="") 
   
   mapC<- reclassify (clima_invroducao[[5]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
@@ -251,20 +253,20 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
   inv_model26_point<-rasterToPoints(inv_model26)
   inv_model26_point<-inv_model26_point[inv_model26_point[,3]==1,c(1:2)]
-  resul[1+2,c(2:5)]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
+  resul[i+3,c(2:5)]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
   
   #guardar o resultado da area do modelo
-  resul[1+2,8]<-stat_model26$area[2]
+  resul[i+3,8]<-stat_model26$area[2]
   #guardar o resultado da performance do modelo
-  resul[1+2,10]<-#naõ sei oq usar aqui
+  resul[i+3,10]<-#naõ sei oq usar aqui
     #calculo do media geometrica da area de invroducao e guardar o resultado
-    resul[1+2,c(6,7)]<- ((apply(inv_model26_point, 2, max)-apply(inv_model26_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
+    resul[i+3,c(6,7)]<- ((apply(inv_model26_point, 2, max)-apply(inv_model26_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
   
   
   
   #predict rcp 85
   #nome da spp e rcp
-  resul[1+5,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","INV", sep="")  
+  resul[i+5,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","INV", sep="")  
     
   mapE<- reclassify (clima_invroducao[[9]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
@@ -284,14 +286,14 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
   # x e y max e min
   inv_model85_point<-rasterToPoints(inv_model85)
   inv_model85_point<-inv_model85_point[inv_model85_point[,3]==1,c(1:2)]
-  resul[1+4,c(2:5)]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
+  resul[i+5,c(2:5)]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
   
   #guardar o resultado da area do modelo
-  resul[1+4,8]<-stat_model85$area[2]
+  resul[i+5,8]<-stat_model85$area[2]
   #guardar o resultado da performance do modelo
-  resul[1+4,10]<-#naõ sei oq usar aqui
+  resul[i+5,10]<-#naõ sei oq usar aqui
     #calculo do media geometrica da area de invroducao e guardar o resultado
-    resul[1+4,c(6,7)]<- ((apply(inv_model85_point, 2, max)-apply(inv_model85_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
+    resul[i+5,c(6,7)]<- ((apply(inv_model85_point, 2, max)-apply(inv_model85_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
   
   }
 }  
