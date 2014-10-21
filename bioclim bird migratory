@@ -107,7 +107,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
       map1<- map1*map2
     }
     
-   rep_model<-mask(map1, NorthA) #fazer o crop apenas para a regiao
+   rep_model<-mask(map1, NorthA)
      
   # validacao area de reproducao
     validate_repro<-reproduccion_rst+rep_model
@@ -143,7 +143,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     map3<- map3*map4
   }
   
-  rep_model26<-crop(map3, NorthA) 
+  rep_model26<-mask(map3, NorthA) 
   
 
   # x e y max e min
@@ -173,7 +173,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     map5<- map5*map6
   }
   
-  rep_model85<-crop(map5, NorthA) 
+  rep_model85<-mask(map5, NorthA) 
   
   # x e y max e min
   rep_model85_point<-rasterToPoints(rep_model85)
@@ -237,7 +237,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     mapA<- mapA*mapB
   }
   
-  inv_model<-crop(mapA1, americas_rst)  
+  inv_model<-mask(mapA, americas_rst) #fazer o crop apenas para a regiao 
   
   # x e y max e min
   inv_model_point<-rasterToPoints(inv_model)
@@ -266,7 +266,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     mapC<- mapC*mapD
   }
   
-  inv_model26<-crop(mapC, SouthA) 
+  inv_model26<-mask(mapC, americas_rst) 
   
   # x e y max e min
   inv_model26_point<-rasterToPoints(inv_model26)
@@ -295,7 +295,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     mapE<- mapE*mapF
   }
   
-  inv_model85<-crop(mapE, NorthA) 
+  inv_model85<-mask(mapE, americas_rst) 
   
   # x e y max e min
   inv_model85_point<-rasterToPoints(inv_model85)
