@@ -237,7 +237,7 @@ run_Bioclim_model<-function(shapes, clima_rep, clima_inv){
     mapA<- mapA*mapB
   }
   
-  inv_model<-crop(mapA1, SouthA) #fazer o crop apenas para a regiao 
+  inv_model<-crop(mapA1, americas_rst)  
   
   # x e y max e min
   inv_model_point<-rasterToPoints(inv_model)
