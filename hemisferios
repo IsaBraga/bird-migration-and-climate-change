@@ -1,0 +1,50 @@
+
+setwd("C:/Users/Maraisa/Dropbox/dados clima")
+var_pres<-dir(pattern=".txt")
+ler_i <-  read.table (var_pres[1], header=T)
+
+long_lat<-cbind(ler_i[,c(2,3)],rep(1, nrow(ler_i))) #preenchido de zeros apenas pra ser visualizado
+raster_0.5_1<-rasterFromXYZ(long_lat)
+raster_0.5_2<-rasterFromXYZ(long_lat)
+writeRaster(raster_0.5_1, "raster_05_1")
+writeRaster(raster_0.5_2, "raster_05_2")
+raster_05_1<-raster("raster_05_1.grd")
+raster_05_2<-raster("raster_05_2.grd")
+
+SouthA<-readShapePoly("SouthA.shp")
+extent_S<-extent(-109.4461, -35, -55.90223, 26.92916)
+SouthA<-crop(SouthA, extent_S)
+NorthA<-readShapePoly("NorthA.shp")
+extentN<-extent(-178.2166, -12.15764, 14.55055, 83.6236)
+
+SouthA_rst<-rasterize(SouthA, raster_05_1)
+NorthA_rst<-rasterize(NorthA, raster_05_2)
+sudamerica<- reclassify (SouthA_rst, c( -Inf,0,NA, 0, 45, 0, 46,+Inf, NA))
+sudamerica<-crop(sudamerica, extent_S)
+northamerica<-reclassify (NorthA_rst, c(-Inf,0,NA, 1, 6, 0, 7,+Inf, NA))
+northamerica<-crop(northamerica, extent_S)
+
+aNorte<-extent(-180, -20, 10, 90)
+NorthA<-crop(NorthA, aNorte)
+NorthA<-NorthA1
+
+SouthA<-gUnaryUnion(SouthA)
+NorthA<-gUnaryUnion(NorthA)
+
+writePolyShape(SouthA, "SouthA.shp")
+world<-extent(-180, 180, -90, 84)
+
+
+write.table(resul, "resul.txt", col.names=T, row.names=F)
+
+rep_modelPoly<-rasterToPolygons(rep_model)
+
+
+Americas_ext<-extent(-168, -20, -55, 83.5 )
+americas<-readShapePoly("America.shp")
+americas<-gUnaryUnion(americas)
+americas<-crop(americas, Americas_ext)
+americas_rst<-rasterize(americas, raster_05_1)
+americas_rst<-crop(americas_rst, Americas_ext)
+america_rst0<-reclassify (americas_rst, c( 0, 1, 0))
+america_rst0<-crop(america_rst0, americas)
