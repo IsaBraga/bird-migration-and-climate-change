@@ -37,16 +37,15 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   # nome da spp e informacaoes dos shapes de invernada e de reproducao
     resul[1,1]<-paste(shapes[1], "_", "REP", sep="")
     resul[1+4,1]<-paste(shapes[1], "_", "INV", sep="")   
+    print(paste(shapes[1]))
   
   # x e y min e max dos shapes
   reproduccion_rst<-rasterize(reproduccion, americas_rst)
   reproduccion_point<-rasterToPoints(reproduccion_rst)
-  reproduccion_point<-reproduccion_point[reproduccion_point[,3]==1,c(1:2)]
   resul[1,c(2:5)]<- c(apply(reproduccion_point, 2, min),apply(reproduccion_point, 2, max))
 
   invernada_rst<-rasterize(invernada, americas_rst )
   invernada_point<-rasterToPoints(invernada_rst)
-  invernada_point<-invernada_point[invernada_point[,3]==1,c(1:2)]
   resul[1+4,c(2:5)]<- c(apply(invernada_point, 2, min),apply(invernada_point, 2, max))
 
   # area dos shapes
@@ -69,19 +68,22 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
       clima_reproducao<-brick(clima_reproJJA[1])
       clima_invernada<-brick(clima_invDJF[1])
       recorte<-NorthA
+      recorte_rst<-northamerica
     }
     
     if(gOverlaps(reproduccion, SouthA)==1){
       clima_reproducao<-brick(clima_reproDJF[1])
       clima_invernada<-brick(clima_invJJA[1])
       recorte<-South
+      recorte_rst<-sudamerica
     }
     
   ## modelo area de reproducao
     #0k
   # nome da spp e rcp
    resul[1+1,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","REP", sep="")
-    
+   print(paste(gsub(".shp", "", shapes[1]), "_", "0k","REP", sep=""))
+  
   # nome do AOGCMs
    resul[c(1+1,1+2,1+3),9]<-gsub(".grd", "", clima_rep[1])
   
@@ -123,7 +125,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
    rep_model<-mask(map1, recorte)
   
   # validacao area de reproducao
-  reproduccion_rst<-merge(rasterize(reproduccion, rep_model ), recorte0)
+  reproduccion_rst<-merge(rasterize(reproduccion, rep_model ), recorte_rst)
   validate_repro<-reproduccion_rst+rep_model
 
   #reproduccion_rst2<-merge(reproduccion_rst, northamerica)
@@ -147,7 +149,8 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   # predict rcp 26    
     # nome da spp e rcp
     resul[1+2,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","REP", sep="")
-      
+    print(paste(gsub(".shp", "", shapes[1]), "_", "26","REP", sep=""))  
+  
   map3<- reclassify (clima_reproducao[[5]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
                                               minmax_rep [1,2], +Inf, 0))
@@ -159,7 +162,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
     map3<- map3*map4
   }
   
-  rep_model26<-mask(map3, NorthA) 
+  rep_model26<-mask(map3, recorte) 
   
   # x e y max e min
   rep_model26_point<-rasterToPoints(rep_model26)
@@ -176,6 +179,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   ## predict rcp 85
   # nome da spp e rcp
   resul[1+3,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","REP", sep="")
+  print(paste(gsub(".shp", "", shapes[1]), "_", "85","REP", sep=""))
  
   map5<- reclassify (clima_reproducao[[9]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
@@ -188,7 +192,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
     map5<- map5*map6
   }
   
-  rep_model85<-mask(map5, NorthA) 
+  rep_model85<-mask(map5, recorte) 
   
   # x e y max e min
   rep_model85_point<-rasterToPoints(rep_model85)
@@ -201,6 +205,8 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   #calculo do media geometrica da area de reproducao e guardar o resultado
   resul[1+3,c(6,7)]<- ((apply(rep_model85_point, 2, max)-apply(rep_model85_point, 2, min)) /2 )  + apply(rep_model85_point, 2, min)
   
+  writeRaster(stack(rep_model, rep_model26, rep_model85), 
+              paste(gsub(".shp", "", shapes[1]), "_",gsub(".grd", "", clima_rep[1]), "_","REP", sep=""))
   }
   
   
@@ -210,6 +216,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
     # 0k
     # nome da spp e rcp
     resul[1+5,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","INV", sep="")  
+    print(paste(gsub(".shp", "", shapes[1]), "_", "0k","INV", sep=""))
     
     # nome do AOGCMs
     resul[c(1+5,1+6,1+7) ,9]<-gsub(".grd", "", clima_inv[1])
@@ -277,6 +284,7 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   #predict rcp 26    
   #nome da spp e rcp 
   resul[1+6,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","INV", sep="") 
+  print(paste(gsub(".shp", "", shapes[1]), "_", "26","INV", sep=""))
   
   mapC<- reclassify (clima_invernada[[5]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
@@ -306,7 +314,8 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
   #predict rcp 85
   #nome da spp e rcp
   resul[1+7,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","INV", sep="")  
-    
+  print(paste(gsub(".shp", "", shapes[1]), "_", "85","INV", sep=""))
+  
   mapE<- reclassify (clima_invernada[[9]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
                                               minmax_inv [1,2], +Inf, 0))
@@ -330,6 +339,9 @@ run_Bioclim_model<-function(shapes, clima_reproJJA, clima_reproDJF, clima_invJJA
  
   # media geometrica da area de invernada
   resul[1+7,c(6,7)]<- ((apply(inv_model85_point, 2, max)-apply(inv_model85_point, 2, min)) /2 )  + apply(inv_model85_point, 2, min)
+  
+  writeRaster(stack(inv_model, inv_model26, inv_model85), 
+              paste(gsub(".shp", "", shapes[1]), "_",gsub(".grd", "", clima_rep[1]), "_","REP", sep=""))
   
   }
 }  
