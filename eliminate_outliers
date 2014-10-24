@@ -1,0 +1,21 @@
+eliminate_outliers<- function (climate, distribution){
+# nicho climatico
+nicho_repro<- extract (stack(climate[[c(1:4)]]),distribution, na.rm=TRUE)
+nicho_rep<-rbind(as.data.frame(nicho_repro[1]), as.data.frame(nicho_repro[2]))
+outlier_rep1 <- outlier(nicho_rep[,1],logical=TRUE)
+outlier_rep2 <- outlier(nicho_rep[,2],logical=TRUE)
+outlier_rep3 <- outlier(nicho_rep[,3],logical=TRUE)
+outlier_rep4 <- outlier(nicho_rep[,4],logical=TRUE)
+find_outlier1<- which(outlier_rep1==TRUE)
+find_outlier2<- which(outlier_rep2==TRUE)
+find_outlier3<- which(outlier_rep3==TRUE)
+find_outlier4<- which(outlier_rep4==TRUE)
+data_new_rep <- nicho_rep[-c(find_outlier1, find_outlier2, find_outlier3, find_outlier4),]
+minmax_rep<- NULL
+  for (i in 1:dim (data_new_rep)[2]){
+    minim<- min (data_new_rep[, i], na.rm=T)
+    maxim<- max (data_new_rep[, i], na.rm=T)
+    minmax_rep<- rbind (minmax_rep, c(minim, maxim))
+  }
+return (minmax_rep)
+}
