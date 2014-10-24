@@ -30,7 +30,6 @@ run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
 ###Funcao###
 
 run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
-  clima<-cbind(clima_JJA, clima_DJF)
   planilha_spp<- list()
   
   for(i in 1:length(shapes)){
@@ -40,7 +39,9 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
     
     paxaro<- readShapePoly (shapes[i])
     reproduccion<- paxaro [paxaro$SEASONAL==2|paxaro$SEASONAL==1,]
+    reproduccion<-gUnaryUnion(reproduccion)
     invernada<- paxaro [paxaro$SEASONAL==3|paxaro$SEASONAL==1,]
+    invernada<-gUnaryUnion(invernada)
     
   # nome da spp e informacaoes dos shapes de invernada e de reproducao
   resul[1,1]<-paste(shapes[i], "_", "REP", sep="")
@@ -81,7 +82,7 @@ clima<-cbind(clima_JJA, clima_DJF)
     if(gOverlaps(reproduccion, SouthA)==1){
       clima_rep<-clima[,2]
       clima_inv<-clima[,1]
-      recorte<-South
+      recorte<-SouthA
       recorte_rst<-sudamerica
     }
 
@@ -92,8 +93,8 @@ clima<-cbind(clima_JJA, clima_DJF)
     
   #0k
   # nome da spp e rcp
-   resul[1,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","REP", sep="")
-   print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_rep[j]),"_", "0k","REP", sep=""))
+   resul[1,1]<-paste(gsub(".shp", "", shapes[i]), "_", "0k","REP", sep="")
+   print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]),"_", "0k","REP", sep=""))
   
   # nome do AOGCMs
    resul[c(1,2,3),9]<-gsub(".grd", "", clima_rep[j])
@@ -133,10 +134,10 @@ clima<-cbind(clima_JJA, clima_DJF)
       map1<- map1*map2
     }
     
-   rep_model<-mask(map1, recorte)
+   rep_model<-crop(map1, recorte)
   
   # validacao area de reproducao
-  reproduccion_rst<-merge(rasterize(reproduccion, rep_model ), recorte_rst)
+  reproduccion_rst<-merge(crop(reproduccion_rst, recorte), recorte_rst)
   validate_repro<-reproduccion_rst+rep_model
 
     #performance do modelo: acertos e sobrepredicao
@@ -157,8 +158,8 @@ clima<-cbind(clima_JJA, clima_DJF)
   
   # predict rcp 26    
     # nome da spp e rcp
-    resul[2,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","REP", sep="")
-    print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
+    resul[2,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","REP", sep="")
+    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
   
   map3<- reclassify (clima_reproducao[[5]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
@@ -171,7 +172,7 @@ clima<-cbind(clima_JJA, clima_DJF)
     map3<- map3*map4
   }
   
-  rep_model26<-mask(map3, recorte) 
+  rep_model26<-crop(map3, recorte) 
   
   # x e y max e min
   rep_model26_point<-rasterToPoints(rep_model26)
@@ -187,8 +188,8 @@ clima<-cbind(clima_JJA, clima_DJF)
         
   ## predict rcp 85
   # nome da spp e rcp
-  resul[3,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","REP", sep="")
-  print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
+  resul[3,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","REP", sep="")
+  print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
  
   map5<- reclassify (clima_reproducao[[9]], c(-Inf, minmax_rep[1,1], 0, 
                                               minmax_rep[1,1], minmax_rep [1,2], 1,
@@ -201,7 +202,7 @@ clima<-cbind(clima_JJA, clima_DJF)
     map5<- map5*map6
   }
   
-  rep_model85<-mask(map5, recorte) 
+  rep_model85<-crop(map5, recorte) 
   
   # x e y max e min
   rep_model85_point<-rasterToPoints(rep_model85)
@@ -215,17 +216,18 @@ clima<-cbind(clima_JJA, clima_DJF)
   resul[3,c(6,7)]<- ((apply(rep_model85_point, 2, max)-apply(rep_model85_point, 2, min)) /2 )  + apply(rep_model85_point, 2, min)
   
   writeRaster(stack(rep_model, rep_model26, rep_model85), 
-              paste(gsub(".shp", "", shapes[1]), "_",gsub(".grd", "", clima_rep[1]), "_","REP", sep=""))
-  }
+              paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""))
+  
   
   
   ### Modelo area de invernada ###
+  
   clima_invernada<-brick(clima_inv[j])   
         
     # 0k
     # nome da spp e rcp
-    resul[4,1]<-paste(gsub(".shp", "", shapes[1]), "_", "0k","INV", sep="")  
-    print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_inv[j]),"_","0k","INV", sep=""))
+    resul[4,1]<-paste(gsub(".shp", "", shapes[i]), "_", "0k","INV", sep="")  
+    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]),"_","0k","INV", sep=""))
     
     # nome do AOGCMs
     resul[c(4,5,6) ,9]<-gsub(".grd", "", clima_inv[j])
@@ -270,7 +272,7 @@ clima<-cbind(clima_JJA, clima_DJF)
   
   
   # validacao area de reproducao
-  invernada_rst<-merge(rasterize(invernada, inv_model ),america_rst0)
+  invernada_rst<-merge(crop(invernada_rst, americas ),america_rst0)
   validate_inv<-invernada_rst+inv_model
  
     #performance do modelo: acertos e sobrepredicao
@@ -292,8 +294,8 @@ clima<-cbind(clima_JJA, clima_DJF)
   
   #predict rcp 26    
   #nome da spp e rcp 
-  resul[5,1]<-paste(gsub(".shp", "", shapes[1]), "_", "26","INV", sep="") 
-  print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_rep[j]), "_","26","INV", sep=""))
+  resul[5,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","INV", sep="") 
+  print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","26","INV", sep=""))
   
   mapC<- reclassify (clima_invernada[[5]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
@@ -322,8 +324,8 @@ clima<-cbind(clima_JJA, clima_DJF)
     
   #predict rcp 85
   #nome da spp e rcp
-  resul[6,1]<-paste(gsub(".shp", "", shapes[1]), "_", "85","INV", sep="")  
-  print(paste(gsub(".shp", "", shapes[1]), "_", gsub(".grd", "", clima_rep[j]), "_","85","INV", sep=""))
+  resul[6,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","INV", sep="")  
+  print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","85","INV", sep=""))
   
   mapE<- reclassify (clima_invernada[[9]], c(-Inf, minmax_inv[1,1], 0, 
                                               minmax_inv[1,1], minmax_inv [1,2], 1,
@@ -350,14 +352,15 @@ clima<-cbind(clima_JJA, clima_DJF)
   resul[6,c(6,7)]<- ((apply(inv_model85_point, 2, max)-apply(inv_model85_point, 2, min)) /2 )  + apply(inv_model85_point, 2, min)
   
   writeRaster(stack(inv_model, inv_model26, inv_model85), 
-              paste(gsub(".shp", "", shapes[1]), "_",gsub(".grd", "", clima_rep[1]), "_","REP", sep=""))
+              paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""))
   
 
     lista[[j+1]]<-resul
     planilha<-rbind(as.data.frame(lista[1]), as.data.frame(lista[2]), as.data.frame(lista[3]), 
                     as.data.frame(lista[4]), as.data.frame(lista[5]), as.data.frame(lista[6]), as.data.frame(lista[7]))
   
-    } planilha_spp[[i]]<-planilha
+    } 
+planilha_spp[[i]]<-planilha
   }
 }
 
