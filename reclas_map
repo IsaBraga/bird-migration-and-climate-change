@@ -1,0 +1,14 @@
+reclas_map<- function (minmax_rep, climate, a, b){
+## reclassify climatic layers to obtain the final map without outliers
+map1<- reclassify (clima_reproducao[[a]], c(-Inf, minmax_rep[1,1], 0,
+                                            minmax_rep[1,1], minmax_rep [1,2], 1,
+                                            minmax_rep [1,2], +Inf, 0))
+g<-stack(clima_reproducao[[c(a:b)]])
+  for (i in 2:dim(g)[3]){
+    map2<- reclassify (clima_reproducao[[i]], c(-Inf, minmax_rep[i,1], 0,
+                                                minmax_rep[i,1], minmax_rep [i,2], 1,
+                                                minmax_rep [i,2], +Inf, 0))
+    map1<- map1*map2
+  }
+return (map1)
+}
