@@ -1,0 +1,49 @@
+##modelo1
+media_sobre_model1<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias)){
+media_sobre_model1[i,1]<-mean(as.numeric(levels(aves_migratorias[[i]]$X..sobrepredicao)), na.rm=T)
+}
+media_sobrep_model1<-mean(media_sobre_model1[,1], na.rm=T)
+
+#
+media_acert_model1<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias)){
+  media_acert_model1[i,1]<-mean(as.numeric(levels(aves_migratorias[[i]]$X..acerto)), na.rm=T)
+}
+media_acerto_model1<-mean(media_acert_model1[,1], na.rm=T)
+
+##mdelo2
+media_sobre_model2<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias_model2)){
+  media_sobre_model2[i,1]<-mean(as.numeric(levels(aves_migratorias_model2[[i]]$X..sobrepredicao)), na.rm=T)
+}
+media_sobrep_model2<-mean(media_sobre_model2[,1], na.rm=T)
+
+#
+media_acert_model2<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias_model2)){
+  media_acert_model2[i,1]<-mean(as.numeric(levels(aves_migratorias_model2[[i]]$X..acerto)), na.rm=T)
+}
+media_acerto_model2<-mean(media_acert_model2[,1], na.rm=T)
+
+
+
+##mdelo3
+media_sobre_model3<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias_model3)){
+  media_sobre_model3[i,1]<-mean(as.numeric(levels(aves_migratorias_model3[[i]]$X..sobrepredicao)), na.rm=T)
+}
+media_sobrep_model3<-mean(media_sobre_model3[,1], na.rm=T)
+
+#
+media_acert_model3<-matrix(nrow=78, ncol=1)
+
+for(i in 1:length(aves_migratorias_model3)){
+  media_acert_model3[i,1]<-mean(as.numeric(levels(aves_migratorias_model3[[i]]$X..acerto)), na.rm=T)
+}
+media_acerto_model3<-mean(media_acert_model3[,1], na.rm=T)
