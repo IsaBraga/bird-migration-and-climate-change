@@ -1,6 +1,6 @@
 eliminate_outliers<- function (climate, distribution){
   # nicho climatico
-  nicho<- extract (stack(climate[[c(1:10)]]),distribution, na.rm=TRUE)
+  nicho<- extract (stack(climate[[c(1:23)]]),distribution, na.rm=TRUE)
   nicho<-rbind(as.data.frame(nicho[1]), as.data.frame(nicho[2]))
   outlier1 <- outlier(nicho[,1],logical=TRUE)
   outlier2 <- outlier(nicho[,2],logical=TRUE)
@@ -12,6 +12,19 @@ eliminate_outliers<- function (climate, distribution){
   outlier8 <- outlier(nicho[,8],logical=TRUE)
   outlier9 <- outlier(nicho[,9],logical=TRUE)
   outlier10 <- outlier(nicho[,10],logical=TRUE)
+  outlier11 <- outlier(nicho[,11],logical=TRUE)
+  outlier12 <- outlier(nicho[,12],logical=TRUE)
+  outlier13 <- outlier(nicho[,13],logical=TRUE)
+  outlier14 <- outlier(nicho[,14],logical=TRUE)
+  outlier15 <- outlier(nicho[,15],logical=TRUE)
+  outlier16 <- outlier(nicho[,16],logical=TRUE)
+  outlier17 <- outlier(nicho[,17],logical=TRUE)
+  outlier18 <- outlier(nicho[,18],logical=TRUE)
+  outlier19 <- outlier(nicho[,19],logical=TRUE)
+  outlier20 <- outlier(nicho[,20],logical=TRUE)
+  outlier21 <- outlier(nicho[,21],logical=TRUE)
+  outlier22 <- outlier(nicho[,22],logical=TRUE)
+  outlier23 <- outlier(nicho[,23],logical=TRUE)
   find_outlier1<- which(outlier1==TRUE)
   find_outlier2<- which(outlier2==TRUE)
   find_outlier3<- which(outlier3==TRUE)
@@ -22,8 +35,24 @@ eliminate_outliers<- function (climate, distribution){
   find_outlier8<- which(outlier8==TRUE)
   find_outlier9<- which(outlier9==TRUE)
   find_outlier10<- which(outlier10==TRUE)
-  data_new <- nicho[-c(find_outlier1, find_outlier2, find_outlier3, find_outlier4, 
-                       find_outlier5, find_outlier6, find_outlier7, find_outlier8,  find_outlier9,  find_outlier10),]
+  find_outlier11<- which(outlier11==TRUE)
+  find_outlier12<- which(outlier12==TRUE)
+  find_outlier13<- which(outlier13==TRUE)
+  find_outlier14<- which(outlier14==TRUE)
+  find_outlier15<- which(outlier15==TRUE)
+  find_outlier16<- which(outlier16==TRUE)
+  find_outlier17<- which(outlier17==TRUE)
+  find_outlier18<- which(outlier18==TRUE)
+  find_outlier19<- which(outlier19==TRUE)
+  find_outlier20<- which(outlier20==TRUE)
+  find_outlier21<- which(outlier21==TRUE)
+  find_outlier22<- which(outlier22==TRUE)
+  find_outlier23<- which(outlier23==TRUE)
+  data_new <- nicho[-c(find_outlier1, find_outlier2, find_outlier3, find_outlier4, find_outlier5,
+                       find_outlier6, find_outlier7, find_outlier8,  find_outlier9,  find_outlier10,
+                       find_outlier11, find_outlier12, find_outlier13, find_outlier14, find_outlier15,
+                       find_outlier16, find_outlier17, find_outlier18,  find_outlier19, find_outlier20,
+                       find_outlier21, find_outlier22, find_outlier23),]
   minmax<- NULL
   for (i in 1:dim (data_new)[2]){
     minim<- min (data_new[, i], na.rm=T)
