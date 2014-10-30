@@ -30,6 +30,10 @@ write.table(aves_migratorias, "aves_migratorias.txt", row.names=F, col.names=F)
 #modelo com as 4 variaveis de JJA e DJF, e mais as outras 6
 aves_migratorias_model2<-run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
 
+# com as 4 variaveis de JJA e DJF, e mais as 19 variaveis 
+aves_migratorias_model3<-run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
+
+
 ###Funcao###
 
 run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
@@ -104,7 +108,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       
       # nicho climatico
       minmax_rep<-eliminate_outliers(climate=clima_reproducao, distribution=reproduccion)
-      map1<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=1, b=10)
+      map1<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=1, b=23)
       rep_model<-crop(map1, recorte)
       
       # validacao area de reproducao
@@ -132,7 +136,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[2,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","REP", sep="")
       print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
       
-      map2<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=11, b=20)
+      map2<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=24, b=46)
       
       rep_model26<-crop(map2, recorte) 
       
@@ -153,7 +157,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[3,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","REP", sep="")
       print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
       
-      map3<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=21, b=30)
+      map3<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=47, b=69)
       
       rep_model85<-crop(map3, recorte) 
       
@@ -187,7 +191,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       
       # nicho climatico
       minmax_inv<-eliminate_outliers (climate=clima_invernada, distribution=invernada)  
-      mapA<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=10)
+      mapA<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=23)
       
       inv_model<-crop(mapA, americas) #fazer o crop apenas para a regiao 
       
@@ -218,7 +222,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[5,1]<-paste(gsub(".shp", "", shapes[i]), "_", "26","INV", sep="") 
       print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","26","INV", sep=""))
       
-      mapC<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=11, b=20)
+      mapC<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=24, b=46)
       inv_model26<-crop(mapC, americas_rst) 
       
       # x e y max e min
@@ -238,7 +242,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[6,1]<-paste(gsub(".shp", "", shapes[i]), "_", "85","INV", sep="")  
       print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","85","INV", sep=""))
       
-      mapE<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=21, b=30)
+      mapE<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=47, b=69)
       
       inv_model85<-crop(mapE, americas_rst) 
       
