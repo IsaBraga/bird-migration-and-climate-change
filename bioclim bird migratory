@@ -45,9 +45,9 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
     colnames(resul)<-c("xmin","ymin","xmax","ymax","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
         
     paxaro<- readShapePoly (shapes[i], delete_null_obj=TRUE)
-    reproduccion<- paxaro [paxaro$SEASONAL==2|paxaro$SEASONAL==1,]
+    reproduccion<-breeding_birds(paxaro)
     reproduccion<-gUnaryUnion(reproduccion)
-    invernada<- paxaro [paxaro$SEASONAL==3|paxaro$SEASONAL==1,]
+    invernada<- nonbreeding_birds(paxaro) 
     invernada<-gUnaryUnion(invernada)
     
     # nome da spp e informacaoes dos shapes de invernada e de reproducao
