@@ -8,7 +8,7 @@ library(rgeos)
 
 
 #objetos necessários
-setwd("/media/leo/Seagate Expansion Drive/Tyrannidae/mapas")
+setwd( "F:/Tyrannidae/mapas")
 SouthA<-readShapePoly("SouthA.shp")
 NorthA<-readShapePoly("NorthA.shp")
 northamerica<-raster("northamerica.grd")
@@ -17,7 +17,7 @@ americas_rst<-raster("americas_rst.grd")
 america_rst0<-raster("america_rst0.grd")
 
 #pasta com todos os shapes e com todos os modelos climaticos
-setwd("/media/leo/Seagate Expansion Drive/Tyrannidae")
+setwd("F:/Tyrannidae")
 clima_JJA<-dir(pattern="JJA.grd")
 clima_DJF<-dir(pattern="DJF.grd")
 shapes<-dir(pattern=".shp")
@@ -44,7 +44,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
     resul<-matrix(nrow=6,ncol=9)
     colnames(resul)<-c("xmin","ymin","xmax","ymax","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
         
-    paxaro<- readShapePoly (shapes[i])
+    paxaro<- readShapePoly (shapes[i], delete_null_obj=TRUE)
     reproduccion<- paxaro [paxaro$SEASONAL==2|paxaro$SEASONAL==1,]
     reproduccion<-gUnaryUnion(reproduccion)
     invernada<- paxaro [paxaro$SEASONAL==3|paxaro$SEASONAL==1,]
@@ -109,15 +109,15 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # nicho climatico
       minmax_rep<-eliminate_outliers(climate=clima_reproducao, distribution=reproduccion)
       map1<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=1, b=23)
-      rep_model<-crop(map1, recorte)
+      rep_model<-crop(map1*2, recorte)
       
       # validacao area de reproducao
       reproduccion_rst<-merge(crop(reproduccion_rst, recorte), recorte_rst)
       validate_repro<-reproduccion_rst+rep_model
       
       #performance do modelo: acertos e sobrepredicao
-      resul[1,8]<-  length(which(validate_repro@data@values==2))/length(which(reproduccion_rst@data@values==1))
-      resul[1,9]<- length(which(rep_model@data@values==1))/length(which(reproduccion_rst@data@values==1))
+      resul[1,8]<-  length(which(validate_repro@data@values==3))/length(which(reproduccion_rst@data@values==1))
+      resul[1,9]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst@data@values==1))
       
       # x e y min e max
       rep_model_point<-rasterToPoints(rep_model)
@@ -191,7 +191,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       minmax_inv<-eliminate_outliers (climate=clima_invernada, distribution=invernada)  
       mapA<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=23)
       
-      inv_model<-crop(mapA, americas) #fazer o crop apenas para a regiao 
+      inv_model<-crop(mapA*2, americas) #fazer o crop apenas para a regiao 
       
       
       # validacao area de reproducao
@@ -199,8 +199,8 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       validate_inv<-invernada_rst+inv_model
       
       #performance do modelo: acertos e sobrepredicao
-      resul[4,8]<-  length(which(validate_inv@data@values==2))/length(which(invernada_rst@data@values==1))
-      resul[4,9]<- length(which(inv_model@data@values==1))/length(which(invernada_rst@data@values==1))
+      resul[4,8]<-  length(which(validate_inv@data@values==3))/length(which(invernada_rst@data@values==1))
+      resul[4,9]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst@data@values==1))
       
       
       # x e y max e min
