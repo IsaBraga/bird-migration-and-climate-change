@@ -8,15 +8,18 @@ library(rgeos)
 
 
 #objetos necessários
-setwd( "F:/Tyrannidae/mapas")
+setwd( "/media/leo/Seagate Expansion Drive/Tyrannidae/mapas")
+setwd("F:/Tyrannidae/mapas")
 SouthA<-readShapePoly("SouthA.shp")
 NorthA<-readShapePoly("NorthA.shp")
 northamerica<-raster("northamerica.grd")
 sudamerica<-raster("sudamerica.grd")
+americas<-readShapePoly("America.shp")
 americas_rst<-raster("americas_rst.grd")
 america_rst0<-raster("america_rst0.grd")
 
 #pasta com todos os shapes e com todos os modelos climaticos
+setwd("/media/leo/Seagate Expansion Drive/Tyrannidae")
 setwd("F:/Tyrannidae")
 clima_JJA<-dir(pattern="JJA.grd")
 clima_DJF<-dir(pattern="DJF.grd")
@@ -42,7 +45,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
   for(i in 1:length(shapes)){
     lista<-list()
     resul<-matrix(nrow=6,ncol=9)
-    colnames(resul)<-c("xmin","ymin","xmax","ymax","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
+    colnames(resul)<-c("long_min","lat","long_max","lat","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
         
     paxaro<- readShapePoly (shapes[i], delete_null_obj=TRUE)
     reproduccion<-breeding_birds(paxaro)
@@ -55,11 +58,10 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
     #resul_nomes[2,1]<-paste(shapes[i], "_", "INV", sep="")   
     print(paste(shapes[i]))
     
-    # x e y min e max dos shapes
+    # latitude e longitude min e max dos shapes
     reproduccion_rst<-rasterize(reproduccion, americas_rst)
     reproduccion_point<-rasterToPoints(reproduccion_rst)
     resul[1,c(1:4)]<- c(apply(reproduccion_point[,c(1:2)], 2, min),apply(reproduccion_point[,c(1:2)], 2, max))
-    
     invernada_rst<-rasterize(invernada, americas_rst )
     invernada_point<-rasterToPoints(invernada_rst)
     resul[2,c(1:4)]<- c(apply(invernada_point[,c(1:2)], 2, min),apply(invernada_point[,c(1:2)], 2, max))
@@ -68,12 +70,9 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
     resul[1,7]<-nrow(reproduccion_point)
     resul[2,7]<-nrow(invernada_point)
     
-    # media geometrica dos shapes
-    resul[1,c(5,6)]<- ((apply(reproduccion_point[,c(1:2)], 2, max)-apply(reproduccion_point[,c(1:2)], 2, min)) /2 )  + 
-      apply(reproduccion_point[,c(1:2)], 2, min)
-    
-    resul[2,c(5,6)]<- ((apply(invernada_point[,c(1:2)], 2, max)-apply(invernada_point[,c(1:2)], 2, min)) /2 )  + 
-      apply(invernada_point[,c(1:2)], 2, min)
+    # centroide dos shapes
+    resul[1,c(5,6)]<- apply(reproduccion_point[,c(1:2)],2,mean)
+    resul[2,c(5,6)]<- apply(invernada_point[,c(1:2)],2,mean)
     
     lista[[1]]<-resul[c(1:2),]
     
@@ -119,7 +118,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[1,8]<-  length(which(validate_repro@data@values==3))/length(which(reproduccion_rst@data@values==1))
       resul[1,9]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst@data@values==1))
       
-      # x e y min e max
+      # latitude e longitude e longitude min e max
       rep_model_point<-rasterToPoints(rep_model)
       rep_model_point<-rep_model_point[rep_model_point[,3]==1,c(1:2)]
       resul[1,c(1:4)]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
@@ -127,8 +126,8 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       #area do modelo
       resul[1,7]<-length(which(rep_model@data@values==1))
       
-      #media geometrica da area de reproducao
-      resul[1,c(5,6)]<- ((apply(rep_model_point, 2, max)-apply(rep_model_point, 2, min)) /2 )  + apply(rep_model_point, 2, min)
+      #centroide da area de reproducao 0k
+      resul[1,c(5,6)]<- apply(rep_model_point,2,mean)
       
       
       # predict rcp 26    
@@ -140,7 +139,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       
       rep_model26<-crop(map2, recorte) 
       
-      # x e y max e min
+      # latitude e longitude max e min
       rep_model26_point<-rasterToPoints(rep_model26)
       rep_model26_point<-rep_model26_point[rep_model26_point[,3]==1,c(1:2)]
       resul[2,c(1:4)]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
@@ -148,9 +147,8 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # area do modelo
       resul[2,7]<-length(which(rep_model26@data@values==1))
       
-      # media geometrica da area de reproducao e guardar o resultado
-      resul[2,c(5,6)]<- ((apply(rep_model26_point, 2, max)-apply(rep_model26_point, 2, min)) /2 )  + apply(rep_model26_point, 2, min)
-      
+      # centroide da area de reproducao 26
+      resul[2,c(5,6)]<- apply(rep_model26_point,2,mean)
       
       ## predict rcp 85
       # nome da spp e rcp
@@ -161,16 +159,16 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       
       rep_model85<-crop(map3, recorte) 
       
-      # x e y max e min
+      # latitude e longitude max e min
       rep_model85_point<-rasterToPoints(rep_model85)
       rep_model85_point<-rep_model85_point[rep_model85_point[,3]==1,c(1:2)]
       resul[3,c(1:4)]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
       
-      # da area do modelo
+      # area da area de reproducao 85 
       resul[3,7]<-length(which(rep_model85@data@values==1))
       
-      #calculo do media geometrica da area de reproducao e guardar o resultado
-      resul[3,c(5,6)]<- ((apply(rep_model85_point, 2, max)-apply(rep_model85_point, 2, min)) /2 )  + apply(rep_model85_point, 2, min)
+      #centroide da area de reproducao 85
+      resul[3,c(5,6)]<- apply(rep_model85_point,2,mean)
       
       #writeRaster(stack(rep_model, rep_model26, rep_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""),overwrite=TRUE)
             
@@ -192,8 +190,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       mapA<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=23)
       
       inv_model<-crop(mapA*2, americas) #fazer o crop apenas para a regiao 
-      
-      
+            
       # validacao area de reproducao
       invernada_rst<-merge(crop(invernada_rst, americas ),america_rst0)
       validate_inv<-invernada_rst+inv_model
@@ -202,8 +199,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       resul[4,8]<-  length(which(validate_inv@data@values==3))/length(which(invernada_rst@data@values==1))
       resul[4,9]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst@data@values==1))
       
-      
-      # x e y max e min
+      # latitude e longitude max e min
       inv_model_point<-rasterToPoints(inv_model)
       inv_model_point<-inv_model_point[inv_model_point[,3]==1,c(1:2)]
       resul[4,c(1:4)]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
@@ -211,9 +207,8 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # area do modelo
       resul[4,7]<-length(which(inv_model@data@values==1))
       
-      # media geometrica da area de invernada
-      resul[4,c(5,6)]<- ((apply(inv_model_point, 2, max)-apply(inv_model_point, 2, min)) /2 )  + apply(inv_model_point, 2, min)
-      
+      # centroide da area de invernada 0k
+      resul[4,c(5,6)]<- apply(inv_model_point,2,mean)
       
       #predict rcp 26    
       #nome da spp e rcp 
@@ -223,7 +218,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       mapC<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=24, b=46)
       inv_model26<-crop(mapC, americas_rst) 
       
-      # x e y max e min
+      # latitute max e min
       inv_model26_point<-rasterToPoints(inv_model26)
       inv_model26_point<-inv_model26_point[inv_model26_point[,3]==1,c(1:2)]
       resul[5,c(1:4)]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
@@ -231,9 +226,9 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # area do modelo
       resul[5,7]<-length(which(inv_model26@data@values==1))
       
-      # media geometrica da area de invernada
-      resul[5,c(5,6)]<- ((apply(inv_model26_point, 2, max)-apply(inv_model26_point, 2, min)) /2 )  + apply(inv_model26_point, 2, min)
-      
+      # centroide da area de invernada 26
+      resul[5,c(5,6)]<- apply(inv_model26_point,2,mean)
+        
       
       #predict rcp 85
       #nome da spp e rcp
@@ -244,7 +239,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       
       inv_model85<-crop(mapE, americas_rst) 
       
-      # x e y max e min
+      # latitude e longitude max e min
       inv_model85_point<-rasterToPoints(inv_model85)
       inv_model85_point<-inv_model85_point[inv_model85_point[,3]==1,c(1:2)]
       resul[6,c(1:4)]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
@@ -252,8 +247,9 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # area do modelo
       resul[6,7]<-length(which(rep_model85@data@values==1))
       
-      # media geometrica da area de invernada
-      resul[6,c(5:6)]<- ((apply(inv_model85_point, 2, max)-apply(inv_model85_point, 2, min)) /2 )  + apply(inv_model85_point, 2, min)
+      # centroide da area de invernada 85
+      resul[6,c(5:6)]<- apply(inv_model85_point,2,mean)
+      
       
       #writeRaster(stack(inv_model, inv_model26, inv_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""),overwrite=TRUE)
       
