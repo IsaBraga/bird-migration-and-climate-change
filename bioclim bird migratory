@@ -6,125 +6,130 @@ library(maptools)
 library(outliers)
 library(rgeos)
 
+###script para área de residencia, invernada e reproducao separadas
 
 #objetos necessários
-setwd( "/media/leo/Seagate Expansion Drive/Tyrannidae/mapas")
-setwd("F:/Tyrannidae/mapas")
-setwd("D:/Ecologia/projeto_migracao_X_ mudancas_climaticas/scrip_aves_migratorias/Bioclim_Tyrannidae/mapas")
-SouthA<-readShapePoly("SouthA.shp")
 sudamerica<-raster("sudamerica.grd")
-NorthA<-readShapePoly("NorthA.shp")
 northamerica<-raster("northamerica.grd")
-americas<-readShapePoly("americas.shp")
 americas_rst<-raster("americas_rst.grd")
 america_rst0<-raster("america_rst0.grd")
-nomes_linhas<-read.table("nomes_linhas.txt", h=F)
+nomes_linhas_modelo4<-read.table("nomes_linhas_modelo4.txt", h=F)
 
 #pasta com todos os shapes e com todos os modelos climaticos
-setwd("/media/leo/Seagate Expansion Drive/Tyrannidae")
-setwd("F:/Tyrannidae")
-setwd("D:/Ecologia/projeto_migracao_X_ mudancas_climaticas/scrip_aves_migratorias/Bioclim_Tyrannidae")
 clima_JJA<-dir(pattern="JJA.grd")
 clima_DJF<-dir(pattern="DJF.grd")
+clima_anual<-dir(patter="_anual.grd")
 shapes<-dir(pattern=".shp")
-
-#modelo com apenas as 4 variaveis de JJA e DJF
-aves_migratorias<-run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
-aves_migratorias2<-as.data.frame(aves_migratorias)
-write.table(aves_migratorias, "aves_migratorias.txt", row.names=F, col.names=F)
-
-#modelo com as 4 variaveis de JJA e DJF, e mais as outras 6
-aves_migratorias_model2<-run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
-
-# com as 4 variaveis de JJA e DJF, e mais as 19 variaveis 
-aves_migratorias_model3<-run_Bioclim_model(shapes=shapes, clima_DJF=clima_DJF, clima_JJA=clima_JJA)
 
 
 ###Funcao###
 
-run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
-    resultados_spp<- array(dim=c(38,9,78))
-    dimnames(resultados_spp)[[3]]<-gsub(".shp", "", shapes)
-    dimnames(resultados_spp)[[2]]<-c("long_min","lat","long_max","lat","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
-    dimnames(resultados_spp)[[1]]<-nomes_linhas[,1]
-    
+run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
+  resultados_spp<- array(dim=c(57,9,78))
+  dimnames(resultados_spp)[[3]]<-gsub(".shp", "", shapes)
+  dimnames(resultados_spp)[[2]]<-c("long_min","lat","long_max","lat","midpoint_x", "midpoint_y","n_cells", "acerto", "sobrepredicao" )
+  dimnames(resultados_spp)[[1]]<-nomes_linhas_modelo4[,1]
+  
   for(i in 1:length(shapes)){
-    paxaro<- readShapePoly (shapes[i], delete_null_obj=TRUE)
-    reproduccion<-breeding_birds(paxaro)
-    reproduccion<-gUnaryUnion(reproduccion)
-    invernada<- nonbreeding_birds(paxaro) 
-    invernada<-gUnaryUnion(invernada)
-    
-    print(paste(shapes[i]))
+   paxaro<- readShapePoly (shapes[i], delete_null_obj=TRUE)
+   reproduccion<-breeding_birds(paxaro)
+   if(!is.null(reproduccion)){
+     reproduccion<-gUnaryUnion(reproduccion)}
+   invernada<- nonbreeding_birds(paxaro) 
+   if(!is.null(invernada)){
+    invernada<-gUnaryUnion(invernada)}
+   residencia<-resident_birds(paxaro)
+   if(!is.null(residencia)){
+    residencia<-gUnaryUnion(residencia)} 
+   
+    print(shapes[i])
     
     # latitude e longitude min e max dos shapes
+   if(!is.null(reproduccion)){
     reproduccion_rst<-rasterize(reproduccion, americas_rst)
     reproduccion_point<-rasterToPoints(reproduccion_rst)
     resultados_spp[1,c(1:4),i]<- c(apply(reproduccion_point[,c(1:2)], 2, min),apply(reproduccion_point[,c(1:2)], 2, max))
+    resultados_spp[1,7,i]<-nrow(reproduccion_point)
+    resultados_spp[1,c(5,6),i]<- apply(reproduccion_point[,c(1:2)],2,mean)
+   }    
+    
+   if(!is.null(invernada)){
     invernada_rst<-rasterize(invernada, americas_rst )
     invernada_point<-rasterToPoints(invernada_rst)
     resultados_spp[2,c(1:4),i]<- c(apply(invernada_point[,c(1:2)], 2, min),apply(invernada_point[,c(1:2)], 2, max))
-    
-    # area dos shapes
-    resultados_spp[1,7,i]<-nrow(reproduccion_point)
     resultados_spp[2,7,i]<-nrow(invernada_point)
-    
-    # centroide dos shapes
-    resultados_spp[1,c(5,6),i]<- apply(reproduccion_point[,c(1:2)],2,mean)
     resultados_spp[2,c(5,6),i]<- apply(invernada_point[,c(1:2)],2,mean)
+   }
+    
    
-    
-  ### Modelos climaticos ###
-    clima<-cbind(clima_JJA, clima_DJF)
-    
-    if (gOverlaps(reproduccion, NorthA)==1){
-      clima_rep<-clima[,1]
-      clima_inv<-clima[,2]
-      recorte<-NorthA
-      recorte_rst<-northamerica
+    if(!is.null(residencia)){
+    residencia_rst<-rasterize(residencia, americas_rst )
+    residencia_point<-rasterToPoints(residencia_rst)
+    resultados_spp[3,c(1:4),i]<- c(apply(residencia_point[,c(1:2)], 2, min),apply(residencia_point[,c(1:2)], 2, max))
+    resultados_spp[3,7,i]<-nrow(residencia_point)
+    resultados_spp[3,c(5,6),i]<- apply(residencia_point[,c(1:2)],2,mean)
     }
-    if(gOverlaps(reproduccion, SouthA)==1){
+    
+    ### Modelos climaticos ###
+    clima<-cbind(clima_JJA, clima_DJF, clima_anual)
+    
+    if (is.na(spp_hem[i,2])){ #cor laranja
+        clima_inv<-clima[,1]
+        clima_res<-clima[,3]      
+      }
+   
+    if(spp_hem[i,2]=="sul" & !is.na(spp_hem)[i,2]){ #cor verde
       clima_rep<-clima[,2]
       clima_inv<-clima[,1]
-      recorte<-SouthA
-      recorte_rst<-sudamerica
+      clima_res<-clima[,3]
+      recorte<-sudamerica
     }
     
-    for(j in 1:nrow(cbind(clima_rep, clima_inv))){
+    if(spp_hem[i,2]=="norte" & !is.na(spp_hem)[i,2]){ #cor azul
+      clima_rep<-clima[,1]
+      clima_inv<-clima[,2]
+      clima_res<-clima[,3]    
+      recorte<-northamerica
+     }
+    
+    
+    
+    for(j in 1:nrow(clima)){
       
-  # modelo area de reproducao #
-  clima_reproducao<-brick(clima_rep[j])
+      # modelo area de reproducao #
+    if(!is.null(reproduccion)){
+      clima_reproducao<-brick(clima_rep[j])
       
-    #0k
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]),"_", "0k","REP", sep=""))
- 
+      #0k
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]),"_", "0k","REP", sep=""))
+      
       # nicho climatico
       minmax_rep<-eliminate_outliers(climate=clima_reproducao, distribution=reproduccion)
       map1<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=1, b=23)
       rep_model<-crop(map1*2, recorte)
       
       # validacao area de reproducao
-      reproduccion_rst<-merge(crop(reproduccion_rst, recorte), recorte_rst)
+      reproduccion_rst<-merge(crop(reproduccion_rst, recorte), recorte)
       validate_repro<-reproduccion_rst+rep_model
       
       #performance do modelo: acertos e sobrepredicao
-      resultados_spp[(j-1)*6+3,8,i]<-  length(which(validate_repro@data@values==3))/length(which(reproduccion_rst@data@values==1))
-      resultados_spp[(j-1)*6+3,9,i]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst@data@values==1))
+      resultados_spp[(j-1)*9+4,8,i]<-  length(which(validate_repro@data@values==3))/length(which(reproduccion_rst@data@values==1))
+      resultados_spp[(j-1)*9+4,9,i]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst@data@values==1))
       
       # latitude e longitude e longitude min e max
       rep_model_point<-rasterToPoints(rep_model)
       rep_model_point<-rep_model_point[rep_model_point[,3]>0,1:2]
-      resultados_spp[(j-1)*6+3,c(1:4),i]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
+      resultados_spp[(j-1)*6+4,c(1:4),i]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
       
       #area do modelo
-      resultados_spp[(j-1)*6+3,7,i]<-length(which(rep_model@data@values==2))
+      resultados_spp[(j-1)*6+4,7,i]<-length(which(rep_model@data@values==2))
       
       #centroide da area de reproducao 0k
-      resultados_spp[(j-1)*6+3,c(5,6),i]<- apply(rep_model_point,2,mean)
+      resultados_spp[(j-1)*6+4,c(5,6),i]<- apply(rep_model_point,2,mean)
       
       
-    # predict rcp 26    
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
+      # predict rcp 26    
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
       
       map2<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=24, b=46)
       rep_model26<-crop(map2, recorte) 
@@ -132,16 +137,16 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # latitude e longitude max e min
       rep_model26_point<-rasterToPoints(rep_model26)
       rep_model26_point<-rep_model26_point[rep_model26_point[,3]==1,c(1:2)]
-      resultados_spp[(j-1)*6+4,c(1:4),i]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
+      resultados_spp[(j-1)*9+5,c(1:4),i]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
       
       # area do modelo
-      resultados_spp[(j-1)*6+4,7,i]<-length(which(rep_model26@data@values==1))
+      resultados_spp[(j-1)*6+5,7,i]<-length(which(rep_model26@data@values==1))
       
       # centroide da area de reproducao 26
-      resultados_spp[(j-1)*6+4,c(5,6),i]<- apply(rep_model26_point,2,mean)
+      resultados_spp[(j-1)*6+5,c(5,6),i]<- apply(rep_model26_point,2,mean)
       
-    # predict rcp 85
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
+      # predict rcp 85
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
       
       map3<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=47, b=69)
       rep_model85<-crop(map3, recorte) 
@@ -149,89 +154,165 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF){
       # latitude e longitude max e min
       rep_model85_point<-rasterToPoints(rep_model85)
       rep_model85_point<-rep_model85_point[rep_model85_point[,3]==1,c(1:2)]
-      resultados_spp[(j-1)*6+5,c(1:4),i]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
+      resultados_spp[(j-1)*9+6,c(1:4),i]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
       
       # area da area de reproducao 85 
-      resultados_spp[(j-1)*6+5,7,i]<-length(which(rep_model85@data@values==1))
+      resultados_spp[(j-1)*6+6,7,i]<-length(which(rep_model85@data@values==1))
       
       #centroide da area de reproducao 85
-      resultados_spp[(j-1)*6+5,c(5,6),i]<- apply(rep_model85_point,2,mean)
+      resultados_spp[(j-1)*6+6,c(5,6),i]<- apply(rep_model85_point,2,mean)
       
-      writeRaster(stack(rep_model, rep_model26, rep_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""),overwrite=TRUE)
+     # writeRaster(stack(rep_model, rep_model26, rep_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""),overwrite=TRUE)
+      }
       
-  
+     
+     
+     
       
-  # Modelo area de invernada #
-      
+      ##### Modelo area de invernada #####
+     if(!is.null(invernada)){
       clima_invernada<-brick(clima_inv[j])   
       
-    # 0k
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]),"_","0k","INV", sep=""))
+      # 0k
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]),"_","0k","INV", sep=""))
       
-     # nicho climatico
+      # nicho climatico
       minmax_inv<-eliminate_outliers (climate=clima_invernada, distribution=invernada)  
       mapA<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=23)
       
-      inv_model<-crop(mapA*2, americas) #fazer o crop apenas para a regiao 
-            
-      # validacao area de reproducao
-      invernada_rst<-merge(crop(invernada_rst, americas ),america_rst0)
+      inv_model<-crop(mapA*2, america_rst0) #fazer o crop apenas para a regiao 
+      
+      # validacao area de invernada
+      invernada_rst<-merge(invernada_rst,america_rst0)
       validate_inv<-invernada_rst+inv_model
       
       # performance do modelo: acertos e sobrepredicao
-      resultados_spp[(j-1)*6+6,8,i]<-  length(which(validate_inv@data@values==3))/length(which(invernada_rst@data@values==1))
-      resultados_spp[(j-1)*6+6,9,i]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst@data@values==1))
+      resultados_spp[(j-1)*9+7,8,i]<-  length(which(validate_inv@data@values==3))/length(which(invernada_rst@data@values==1))
+      resultados_spp[(j-1)*9+7,9,i]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst@data@values==1))
       
       # latitude e longitude max e min
       inv_model_point<-rasterToPoints(inv_model)
-      inv_model_point<-inv_model_point[inv_model_point[,3]>0,c(1:2)]
-      resultados_spp[(j-1)*6+6,c(1:4),i]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
+      inv_model_point<-inv_model_point[inv_model_point[,3]==2,c(1:2)]
+      resultados_spp[(j-1)*9+7,c(1:4),i]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
       
       # area do modelo
-      resultados_spp[(j-1)*6+6,7,i]<-length(which(inv_model@data@values==2))
+      resultados_spp[(j-1)*9+7,7,i]<-length(which(inv_model@data@values==2))
       
       # centroide da area de invernada 0k
-      resultados_spp[(j-1)*6+6,c(5,6),i]<- apply(inv_model_point,2,mean)
+      resultados_spp[(j-1)*9+7,c(5,6),i]<- apply(inv_model_point,2,median)
       
-    #predict rcp 26    
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","26","INV", sep=""))
+      #predict rcp 26    
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","26","INV", sep=""))
       
       mapC<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=24, b=46)
-      inv_model26<-crop(mapC, americas_rst) 
+      inv_model26<-crop(mapC, america_rst0) 
       
       # latitute max e min
       inv_model26_point<-rasterToPoints(inv_model26)
       inv_model26_point<-inv_model26_point[inv_model26_point[,3]==1,c(1:2)]
-      resultados_spp[(j-1)*6+7,c(1:4),i]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
+      resultados_spp[(j-1)*9+8,c(1:4),i]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
       
       # area do modelo
-      resultados_spp[(j-1)*6+7,7,i]<-length(which(inv_model26@data@values==1))
+      resultados_spp[(j-1)*9+8,7,i]<-length(which(inv_model26@data@values==1))
       
       # centroide da area de invernada 26
-      resultados_spp[(j-1)*6+7,c(5,6),i]<- apply(inv_model26_point,2,mean)
-        
+      resultados_spp[(j-1)*9+8,c(5,6),i]<- apply(inv_model26_point,2,mean)
       
-    #predict rcp 85
-    print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","85","INV", sep=""))
+      
+      #predict rcp 85
+      print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","85","INV", sep=""))
       
       mapE<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=47, b=69)
       
-      inv_model85<-crop(mapE, americas_rst) 
+      inv_model85<-crop(mapE, america_rst0) 
       
       # latitude e longitude max e min
       inv_model85_point<-rasterToPoints(inv_model85)
       inv_model85_point<-inv_model85_point[inv_model85_point[,3]==1,c(1:2)]
-      resultados_spp[(j-1)*6+8,c(1:4),i]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
+      resultados_spp[(j-1)*9+9,c(1:4),i]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
       
       # area do modelo
-      resultados_spp[(j-1)*6+8,7,i]<-length(which(rep_model85@data@values==1))
+      resultados_spp[(j-1)*9+9,7,i]<-length(which(inv_model85@data@values==1))
       
       # centroide da area de invernada 85
-      resultados_spp[(j-1)*6+8,c(5:6),i]<- apply(inv_model85_point,2,mean)
+      resultados_spp[(j-1)*9+9,c(5:6),i]<- apply(inv_model85_point,2,mean)
       
-       
-      writeRaster(stack(inv_model, inv_model26, inv_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""),overwrite=TRUE)
-   
+      
+      #writeRaster(stack(inv_model, inv_model26, inv_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""),overwrite=TRUE)
+     }
+    
+     
+     
+     
+     ##### modelo area de residencia #####
+    if(!is.null(residencia)){
+     clima_residencia<-brick(clima_res[j])
+     
+     #0k
+     print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]),"_", "0k","res", sep=""))
+     
+     # nicho climatico
+     minmax_res<-eliminate_outliers_res(climate=clima_residencia, distribution=residencia)
+     map1<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=1, b=19)
+     res_model<-crop(map1*2, america_rst0)
+     
+     # validacao area de residencia
+     residencia_rst<-merge(residencia_rst, america_rst0)
+     validate_resid<-residencia_rst+res_model
+     
+     #performance do modelo: acertos e sobresredicao
+     resultados_spp[(j-1)*9+10,8,i]<-  length(which(validate_resid@data@values==3))/length(which(residencia_rst@data@values==1))
+     resultados_spp[(j-1)*9+10,9,i]<- length(which(validate_resid@data@values==2))/length(which(residencia_rst@data@values==1))
+     
+     # latitude e longitude e longitude min e max
+     res_model_point<-rasterToPoints(res_model)
+     res_model_point<-res_model_point[res_model_point[,3]>0,1:2]
+     resultados_spp[(j-1)*9+10,c(1:4),i]<- c(apply(res_model_point, 2, min),apply(res_model_point, 2, max))
+     
+     #area do modelo
+     resultados_spp[(j-1)*9+10,7,i]<-length(which(res_model@data@values==2))
+     
+     #centroide da area de residencia 0k
+     resultados_spp[(j-1)*9+10,c(5,6),i]<- apply(res_model_point,2,mean)
+     
+     
+     # predict rcp 26    
+     print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]), "_","26","res", sep=""))  
+     
+     map2<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=20, b=38)
+     res_model26<-crop(map2, america_rst0) 
+     
+     # latitude e longitude max e min
+     res_model26_point<-rasterToPoints(res_model26)
+     res_model26_point<-res_model26_point[res_model26_point[,3]==1,c(1:2)]
+     resultados_spp[(j-1)*9+11,c(1:4),i]<- c(apply(res_model26_point, 2, min),apply(res_model26_point, 2, max))
+     
+     # area do modelo
+     resultados_spp[(j-1)*9+11,7,i]<-length(which(res_model26@data@values==1))
+     
+     # centroide da area de residencia 26
+     resultados_spp[(j-1)*9+11,c(5,6),i]<- apply(res_model26_point,2,mean)
+     
+     # predict rcp 85
+     print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]), "_","85","res", sep=""))
+     
+     map3<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=39, b=57)
+     res_model85<-crop(map3, america_rst0) 
+     
+     # latitude e longitude max e min
+     res_model85_point<-rasterToPoints(res_model85)
+     res_model85_point<-res_model85_point[res_model85_point[,3]==1,c(1:2)]
+     resultados_spp[(j-1)*9+12,c(1:4),i]<- c(apply(res_model85_point, 2, min),apply(res_model85_point, 2, max))
+     
+     # area da area de residencia 85 
+     resultados_spp[(j-1)*9+12,7,i]<-length(which(res_model85@data@values==1))
+     
+     #centroide da area de residencia 85
+     resultados_spp[(j-1)*9+12,c(5,6),i]<- apply(res_model85_point,2,mean)
+     
+     #writeRaster(stack(res_model, res_model26, res_model85), paste(gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_res[j]), "_","res", sep=""),overwrite=TRUE)
+     
+     }     
     } 
   }
   return(resultados_spp)
