@@ -6,9 +6,9 @@ library(maptools)
 library(outliers)
 library(rgeos)
 
-###script para Ã¡rea de residencia, invernada e reproducao separadas
+###script para area de residencia, invernada e reproducao separadas
 
-#objetos necessÃ¡rios
+#objetos necessarios
 
 
 #pasta com todos os shapes e com todos os modelos climaticos
@@ -28,7 +28,6 @@ america_rst0<-raster("america_rst0.grd")
 nomes_linhas<-read.table("nomes_linhas.txt", h=F)
 nomes_linhas_modelo4<-read.table("nomes_linhas_modelo4.txt", h=F)
 
-read("/dados")
 ###Funcao###
 
 run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
