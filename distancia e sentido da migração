@@ -1,0 +1,50 @@
+### sentido da Mudanca nos centroides
+#reproducao
+centRep_Bons_lat0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5,])[,-1]
+centRep_Bons_lat26<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5,])[,-1]
+centRep_Bons_lat85<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5,])[,-1]
+centRep_Bons_long0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",6,])[,-1]
+centRep_Bons_long26<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",6,])[,-1]
+centRep_Bons_long85<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",6,])[,-1]
+
+centRep_Bons_lat0k_26<-centRep_Bons_lat26-centRep_Bons_lat0k
+centRep_Bons_lat0k_85<-centRep_Bons_lat85-centRep_Bons_lat0k
+centRep_Bons_long0k_26<-centRep_Bons_long26-centRep_Bons_long0k
+centRep_Bons_long0k_85<-centRep_Bons_long85-centRep_Bons_long0k
+
+centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26<0 #centroide deslocou para SW
+centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26>0 #centroide deslocou para SE
+centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26>0 #centroide deslocou para NE
+centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26<0 #centroide deslocou para NW
+
+centRep_Bons_lat0k_85<0 & centRep_Bons_long0k_85<0 #centroide deslocou para SW
+centRep_Bons_lat0k_85<0 & centRep_Bons_long0k_85>0 #centroide deslocou para SE
+centRep_Bons_lat0k_85>0 & centRep_Bons_long0k_85>0 #centroide deslocou para NE
+centRep_Bons_lat0k_85>0 & centRep_Bons_long0k_85<0 #centroide deslocou para NW
+
+
+
+
+
+#distancias de migracao!! **a cereja do bolo**
+library(geosphere)
+
+
+distVincentyEllipsoid(p1=aves_migratorias_model6bons[nomes_index4$fase=="RES",5:6,1][2,],p2=aves_migratorias_model6bons[nomes_index4$fase=="RES",5:6,1][3,])/1000
+
+midInv_0k<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midInv_26<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="26",5:6,][-1,,]
+midInv_85<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRep_0k<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRep_26<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRep_26<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRes_0k<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRes_26<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRes_85<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+array(midInv_0k, midRep_0k)
+array(midInv_26, midRep_26)
+
+...
