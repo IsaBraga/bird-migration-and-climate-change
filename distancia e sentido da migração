@@ -1,3 +1,628 @@
+#### modelo 6 ####
+
+nomes_index4<-read.table("nomes_index4.txt", h=T) #para a indexaçao 
+
+
+##media geral de acerto (%) modelo7
+mean(apply(aves_migratorias_model6[,8,], 2,mean, na.rm=T)) #0.6795605
+
+#media de acerto (%) por modelo climatico
+cbind(apply(aves_migratorias_model6[nomes_index4$epoca=="0k",8,], 1,mean, na.rm=T))
+CCSM_0kREP   0.6912939
+CCSM_0kINV   0.6000389
+CCSM_0kRES   0.6044576
+FGOALS_0kREP 0.7203195
+FGOALS_0kINV 0.6975690
+FGOALS_0kRES 0.7694212
+GISS_0kREP   0.6924328
+GISS_0kINV   0.6425500
+GISS_0kRES   0.6273720
+IPSL_0kREP   0.6683986
+IPSL_0kINV   0.6828460
+IPSL_0kRES   0.7003833
+MIROC_0kREP  0.7232995
+MIROC_0kINV  0.6666849
+MIROC_0kRES  0.6471558
+MRI_0kREP    0.6824452
+MRI_0kINV    0.6568813
+MRI_0kRES    0.6235158
+
+par(mfrow=c(1,6))
+acerto_inv6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",8,])[,-1]
+hist(acerto_inv6[,1], main="", xlab="acerto Rep CCSM")
+hist(acerto_inv6[,2], main="", xlab="acerto Rep FGOALS")
+hist(acerto_inv6[,3], main="", xlab="acerto Rep GISS")
+hist(acerto_inv6[,4], main="modelo 6 INV", xlab="acerto Rep IPSL")
+hist(acerto_inv6[,5], main="", xlab="acerto Rep MIROC")
+hist(acerto_inv6[,6], main="", xlab="acerto Rep MRI")
+
+windows()
+par(mfrow=c(1,6))
+acerto_rep6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",8,])[,-1]
+hist(acerto_rep6[,1], main="", xlab="acerto Rep CCSM")
+hist(acerto_rep6[,2], main="", xlab="acerto Rep FGOALS")
+hist(acerto_rep6[,3], main="", xlab="acerto Rep GISS")
+hist(acerto_rep6[,4], main="modelo 6 REP", xlab="acerto Rep IPSL")
+hist(acerto_rep6[,5], main="", xlab="acerto Rep MIROC")
+hist(acerto_rep6[,6], main="", xlab="acerto Rep MRI")
+
+
+par(mfrow=c(1,6))
+acerto_res6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",8,])[,-1]
+hist(acerto_res6[,1], main="", xlab="acerto Res CCSM")
+hist(acerto_res6[,2], main="", xlab="acerto Res FGOALS")
+hist(acerto_res6[,3], main="", xlab="acerto Res GISS")
+hist(acerto_res6[,4], main="modelo 6 RES", xlab="acerto Res IPSL")
+hist(acerto_res6[,5], main="", xlab="acerto Res MIROC")
+hist(acerto_res6[,6], main="", xlab="acerto Res MRI")
+
+par(mfrow=c(1,1))
+
+par(mar=c(4,4,2,2))
+
+
+
+
+##sobrepredicao###############
+##media geral de sobrepredicao (%) modelo6
+mean(apply(aves_migratorias_model6[,9,], 2,mean, na.rm=T)) #0.2326685
+
+#media de sobrepredicao (%) por modelo climatico
+cbind(apply(aves_migratorias_model6[nomes_index4$epoca=="0k",9,], 1,mean, na.rm=T))
+CCSM_0kREP   0.2423748
+CCSM_0kINV   0.1951782
+CCSM_0kRES   0.2259766
+FGOALS_0kREP 0.2246601
+FGOALS_0kINV 0.2585659
+FGOALS_0kRES 0.2500060
+GISS_0kREP   0.2177200
+GISS_0kINV   0.2414949
+GISS_0kRES   0.2246758
+IPSL_0kREP   0.1883230
+IPSL_0kINV   0.2371432
+IPSL_0kRES   0.2183399
+MIROC_0kREP  0.2339280
+MIROC_0kINV  0.2290993
+MIROC_0kRES  0.2181035
+MRI_0kREP    0.2353860
+MRI_0kINV    0.2325044
+MRI_0kRES    0.2534572
+
+par(mfrow=c(1,6))
+sobrepredicao_inv6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",9,])[,-1]
+hist(sobrepredicao_inv6[,1], main="", xlab="CCSM")
+hist(sobrepredicao_inv6[,2], main="", xlab="FGOALS")
+hist(sobrepredicao_inv6[,3], main="sobrepredicao 
+     modelo7 INV", xlab="GISS")
+hist(sobrepredicao_inv6[,4], main="", xlab="IPSL")
+hist(sobrepredicao_inv6[,5], main="", xlab="MIROC")
+hist(sobrepredicao_inv6[,6], main="", xlab="MRI")
+title(sobrepredicao modelo7 INV)
+
+windows()
+par(mfrow=c(1,6))
+sobrepredicao_rep6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",9,])[,-1]
+hist(sobrepredicao_rep6[,1], main="", xlab="CCSM")
+hist(sobrepredicao_rep6[,2], main="", xlab="FGOALS")
+hist(sobrepredicao_rep6[,3], main="sobrepredicao 
+     modelo7 REP", xlab="GISS")
+hist(sobrepredicao_rep6[,4], main="", xlab="IPSL")
+hist(sobrepredicao_rep6[,5], main="", xlab="MIROC")
+hist(sobrepredicao_rep6[,6], main="", xlab="MRI")
+
+
+par(mfrow=c(1,6))
+sobrepredicao_res6<-t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",9,])[,-1]
+hist(sobrepredicao_res6[,1], main="", xlab="CCSM")
+hist(sobrepredicao_res6[,2], main="", xlab="FGOALS")
+hist(sobrepredicao_res6[,3], main="sobrepredicao 
+     modelo7 RES", xlab="GISS")
+hist(sobrepredicao_res6[,4], main="", xlab="IPSL")
+hist(sobrepredicao_res6[,5], main="", xlab="MIROC")
+hist(sobrepredicao_res6[,6], main="", xlab="MRI")
+
+par(mfrow=c(1,1))
+
+
+
+
+
+par(mar=c(4,4,2,2))
+
+
+##adequabilidade
+adeqInv_model6<-t(aves_migratorias_model6[nomes_index4$fase=="INV" &nomes_index4$epoca=="0k",10,])[,-1]
+
+adeqRep_model6<-t(aves_migratorias_model6[nomes_index4$fase=="REP" &nomes_index4$epoca=="0k",10,])[,-1]
+
+adeqRes_model6<-t(aves_migratorias_model6[nomes_index4$fase=="RES" &nomes_index4$epoca=="0k",10,])[,-1]
+
+plot(adeqInv_model6,((1-acerto_inv6)*2+sobrepredicao_inv6), ylim=c(0,2), xlim=c(0,0.4))
+points(adeqInv_model6,sobrepredicao_inv6, col="red")
+points(adeqInv_model6, acerto_inv6, col="blue")
+
+par(mfrow=c(1,2))
+adeqInv_model6<-t(aves_migratorias_model6[nomes_index4$fase=="INV" &nomes_index4$epoca=="0k",10,])[,-1]
+
+adeqRep_model6<-t(aves_migratorias_model6[nomes_index4$fase=="REP" &nomes_index4$epoca=="0k",10,])[,-1]
+
+adeqRes_model6<-t(aves_migratorias_model6[nomes_index4$fase=="RES" &nomes_index4$epoca=="0k",10,])[,-1]
+acerto_inv6<-t(aves_migratorias_model6[nomes_index4$fase=="INV" &nomes_index4$epoca=="0k",8,])[,-1]
+sobrepredicao_inv6<-t(aves_migratorias_model6[nomes_index4$fase=="INV" &nomes_index4$epoca=="0k",9,])[,-1]
+
+plot(adeqInv_model6,((1-acerto_inv6)*1.3+sobrepredicao_inv6), ylim=c(0,2), xlim=c(0,0.4))
+points(adeqInv_model6,sobrepredicao_inv6, col="red")
+points(adeqInv_model6, acerto_inv6, col="blue")
+
+plot(acerto_inv6, sobrepredicao_inv6, ylim=c(0,1.4))
+plot(acerto_inv6, sobrepredicao_inv6, col="red")
+
+
+  
+
+######################
+
+
+plot(sobrepredicao_inv6~acerto_inv6)
+boxplot(c(acerto_inv6[,-1])~rep(colnames(acerto_inv6)[-1], each=77))
+boxplot(c(sobrepredicao_inv6[,-1])~rep(colnames(sobrepredicao_inv6)[-1], each=77))
+
+
+plot(sobrepredicao_rep6~acerto_rep6)
+boxplot(c(acerto_rep6[,-1])~rep(colnames(acerto_rep6)[-1], each=77))
+boxplot(c(sobrepredicao_rep6[,-1])~rep(colnames(sobrepredicao_rep6)[-1], each=77))
+
+
+plot(sobrepredicao_res6~acerto_res6)
+boxplot(c(acerto_res6[,-1])~rep(colnames(acerto_res6)[-1], each=77))
+boxplot(c(sobrepredicao_res6[,-1])~rep(colnames(sobrepredicao_res6)[-1], each=77))
+
+
+
+
+
+###area (n} de celulas) perda ou ganho
+#invernada
+Area0k.inv6 <- t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",7,])[,-1]
+Area26.inv6 <- t(aves_migratorias_model6[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",7,])[,-1]
+Area85.inv6 <- t(aves_migratorias_model6[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",7,])[,-1]
+
+plot(Area0k.inv6, Area26.inv6, col="red", ylab="Area rcp26 e rcp85") #plotar o tamaho das areas(0k x 26)
+points(Area0k.inv6, Area85.inv6, col="green") #(0k X 85)
+
+
+#reproducao
+Area0k.rep6 <- t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",7,])[,-1]
+Area26.rep6 <- t(aves_migratorias_model6[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",7,])[,-1]
+Area85.rep6 <- t(aves_migratorias_model6[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",7,])[,-1]
+
+plot(Area0k.rep6, Area26.rep6, col="red", ylab="Area rcp26 e rcp85") #plotar o tamaho das areas(0k x 26)
+points(Area0k.rep6, Area85.rep6, col="green") #(0k X 85)
+abline(c(0,1))
+
+#residencia
+Area0k.res6 <- t(aves_migratorias_model6[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",7,])[,-1]
+Area26.res6 <- t(aves_migratorias_model6[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",7,])[,-1]
+Area85.res6 <- t(aves_migratorias_model6[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",7,])[,-1]
+
+plot(Area0k.res6, Area26.res6, col="red", ylab="Area rcp26 e rcp85") #plotar o tamaho das areas(0k x 26)
+points(Area0k.res6, Area85.res6, col="green") #(0k X 85)
+
+
+
+
+
+
+
+
+
+###matriz so para os bons##
+spp_goodModels6<-matrix(nrow=77, ncol=18)
+colnames(spp_goodModels6)<-paste(rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), each=3, times=1),
+                                 rep(c("REP","INV","RES"), each=1, times=6), sep="_")
+rownames(spp_goodModels6)<-rownames(acerto_inv6)  
+
+spp_goodModels6[,c(1,4,7,10,13,16)] <- acerto_rep6>0.7 & sobrepredicao_rep6<0.3
+spp_goodModels6[,c(2,5,8,11,14,17)] <- acerto_inv6>0.7 & sobrepredicao_inv6<0.3
+spp_goodModels6[,c(3,6,9,12,15,18)] <- acerto_res6>0.7 & sobrepredicao_res6<0.3
+
+spp_goodModels6<-as.data.frame(spp_goodModels6)
+
+aves_migratorias_model6[,,spp_goodModels6$CCSM_REP==TRUE & !is.na(spp_goodModels6$CCSM_REP)])
+
+#tranformar o array do modelo6 restando apenas os valores dos bons modelos
+aves_migratorias_model6bons<-aves_migratorias_model6
+for(i in 1:ncol(spp_goodModels6)){
+  for(j in 1:nrow(spp_goodModels6)){
+    if(spp_goodModels6[j,i]==0 & !is.na(spp_goodModels6[j,i])){
+      aves_migratorias_model6bons[(3*i+1):(3*i+3),,j]<-NA
+      
+    }    
+  }  
+}
+
+
+
+
+
+
+###area (n de celulas) perda ou ganho so para os bons
+#invernada
+Area0k.inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",7,])[,-1]
+Area26.inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",7,])[,-1]
+Area85.inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",7,])[,-1]
+
+#porcentagem de area perdida 
+porcent_Inv26<-(Area0k.inv6bons-Area26.inv6bons)/Area0k.inv6bons
+porcent_Inv85<-(Area0k.inv6bons-Area85.inv6bons)/Area0k.inv6bons
+
+#plot mediana da porcentagem de area perdida para todos os modelos climaticos
+plot(apply(porcent_Inv26,2,median, na.rm=T), apply(porcent_Inv85,2,median, na.rm=T), 
+     col="red", pch=16, xlim=c(0,1), ylim=c(0,1))
+
+abline(c(0,1))
+
+#plot porcentagem de area perdida para todos os modelos climaticos
+points(porcent_Inv26, porcent_Inv85)
+
+#plot valores absolutos para todas as ssp (circulos cheios) e apenas para as spp com modelos bons (circulos vazados)
+plot(Area0k.inv6, Area26.inv6, col="red", pch=16, ylab="Area rcp26 e rcp85", xlab="Area 0k")
+points(Area0k.inv6, Area85.inv6, col="green", pch=16)
+points(Area0k.inv6bons, Area26.inv6bons, col="black")
+points(Area0k.inv6bons, Area85.inv6bons, col="blue")
+
+
+#plot valores absolutos das areas (todas as spp): 0k x 26 e 0k x 85 CCSM inv
+plot(Area0k.inv6bons[,1], Area26.inv6bons[,1], col="red", , xlab="area (n celulas) 0k INV",
+    ylim=c(0,4000), ylab="area (n celulas) rcp26 e 85 INV") #plotar o tamaho das areas(0k x 26)
+points(Area0k.inv6bons[,1], Area85.inv6bons[,1], col="green") #(0k X 85)
+abline(c(0,1))
+
+
+#plot valores de area restante: 0k-26 e 0k-85 todos os modelos climaticos inv
+plot(Area0k.inv6bons[,1]-Area26.inv6bons[,1],Area0k.inv6bons[,1]-Area85.inv6bons[,1], xlim=c(0,3000), col="red",pch=16)
+points(Area0k.inv6bons[,2]-Area26.inv6bons[,2],Area0k.inv6bons[,2]-Area85.inv6bons[,2], col="blue", pch=16)
+points(Area0k.inv6bons[,3]-Area26.inv6bons[,3],Area0k.inv6bons[,3]-Area85.inv6bons[,3], col="oArea",pch=16)
+points(Area0k.inv6bons[,4]-Area26.inv6bons[,4],Area0k.inv6bons[,4]-Area85.inv6bons[,4],  col="green",pch=16)
+points(Area0k.inv6bons[,5]-Area26.inv6bons[,5],Area0k.inv6bons[,5]-Area85.inv6bons[,5], col="black", pch=16)
+points(Area0k.inv6bons[,6]-Area26.inv6bons[,6],Area0k.inv6bons[,6]-Area85.inv6bons[,6],  col="purple",pch=16)
+
+
+
+
+#reproducao
+Area0k.rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",7,])[,-1]
+Area26.rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",7,])[,-1]
+Area85.rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",7,])[,-1]
+
+
+#porcentagem de area perdida 
+porcent_Rep26<-(Area0k.rep6bons-Area26.rep6bons)/Area0k.rep6bons
+porcent_Rep85<-(Area0k.rep6bons-Area85.rep6bons)/Area0k.rep6bons
+
+#plot mediana da porcentagem de area perdida para todos os modelos climaticos
+plot(apply(porcent_Rep26,2,median, na.rm=T), apply(porcent_Rep85,2,median, na.rm=T), 
+     col="blue", pch=16, xlim=c(0,1), ylim=c(0,1))
+
+abline(c(0,1))
+
+#plot porcentagem de area perdida para todos os modelos climaticos
+points(porcent_Rep26, porcent_Rep85)
+
+#plot valores absolutos para todas as ssp (circulos cheios) e apenas para as spp com modelos bons (circulos vazados)
+plot(Area0k.rep6, Area26.rep6, col="red", pch=16, ylab="Area rcp26 e rcp85", xlab="Area 0k")
+points(Area0k.rep6, Area85.rep6, col="green", pch=16)
+points(Area0k.rep6bons, Area26.rep6bons, col="black")
+points(Area0k.rep6bons, Area85.rep6bons, col="blue")
+
+
+
+#plot valores dadiferença ente as areas: 0k-26 e 0k-85 todos os modelos climaticos rep
+plot(Area0k.rep6bons[,1]-Area26.rep6bons[,1],Area0k.rep6bons[,1]-Area85.rep6bons[,1], 
+     xlim=c(0,3000),  ylim=c(0,3000), col="red",pch=16)
+points(Area0k.rep6bons[,2]-Area26.rep6bons[,2],Area0k.rep6bons[,2]-Area85.rep6bons[,2], col="blue", pch=16)
+points(Area0k.rep6bons[,3]-Area26.rep6bons[,3],Area0k.rep6bons[,3]-Area85.rep6bons[,3], col="oArea",pch=16)
+points(Area0k.rep6bons[,4]-Area26.rep6bons[,4],Area0k.rep6bons[,4]-Area85.rep6bons[,4],  col="green",pch=16)
+points(Area0k.rep6bons[,5]-Area26.rep6bons[,5],Area0k.rep6bons[,5]-Area85.rep6bons[,5], col="black", pch=16)
+points(Area0k.rep6bons[,6]-Area26.rep6bons[,6],Area0k.rep6bons[,6]-Area85.rep6bons[,6],  col="purple",pch=16)
+abline(c(0,1))
+
+
+
+#residencia
+Area0k.res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",7,])[,-1]
+Area26.res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",7,])[,-1]
+Area85.res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",7,])[,-1]
+
+#porcentagem de area perdida 
+porcent_Res26<-(Area0k.res6bons-Area26.res6bons)/Area0k.res6bons
+porcent_Res85<-(Area0k.res6bons-Area85.res6bons)/Area0k.res6bons
+
+#plot mediana da porcentagem de area perdida para todos os modelos climaticos
+plot(apply(porcent_Res26,2,median, na.rm=T), apply(porcent_Res85,2,median, na.rm=T), 
+     col="green", pch=16, xlim=c(0,1), ylim=c(0,1))
+abline(c(0,1))
+
+#plot porcentagem de area perdida para todos os modelos climaticos
+points(porcent_Res26, porcent_Res85)
+
+#plot valores absolutos para todas as ssp (circulos cheios) e apenas para as spp com modelos bons (circulos vazados)
+plot(Area0k.res6, Area26.res6, col="red", pch=16, ylab="Area rcp26 e rcp85", xlab="Area 0k")
+points(Area0k.res6, Area85.res6, col="green", pch=16)
+points(Area0k.res6bons, Area26.res6bons, col="black")
+points(Area0k.res6bons, Area85.res6bons, col="blue")
+
+
+
+#plot valores da diferença ente as areas: 0k-26 e 0k-85 todos os modelos climaticos res
+plot(Area0k.res6bons[,1]-Area26.res6bons[,1],Area0k.res6bons[,1]-Area85.res6bons[,1], 
+     xlim=c(0,3000),  ylim=c(0,3000), col="red",pch=16)
+points(Area0k.res6bons[,2]-Area26.res6bons[,2],Area0k.res6bons[,2]-Area85.res6bons[,2], col="blue", pch=16)
+points(Area0k.res6bons[,3]-Area26.res6bons[,3],Area0k.res6bons[,3]-Area85.res6bons[,3], col="oArea",pch=16)
+points(Area0k.res6bons[,4]-Area26.res6bons[,4],Area0k.res6bons[,4]-Area85.res6bons[,4],  col="green",pch=16)
+points(Area0k.res6bons[,5]-Area26.res6bons[,5],Area0k.res6bons[,5]-Area85.res6bons[,5], col="black", pch=16)
+points(Area0k.res6bons[,6]-Area26.res6bons[,6],Area0k.res6bons[,6]-Area85.res6bons[,6],  col="purple",pch=16)
+abline(c(0,1))
+
+
+
+##
+
+plot(apply(porcent_Res26,2,median, na.rm=T), apply(porcent_Res85,2,median, na.rm=T), 
+     col="green", pch=1:6, xlim=c(0,1), ylim=c(0,1))
+  points(apply(porcent_Rep26,2,median, na.rm=T), apply(porcent_Rep85,2,median, na.rm=T), 
+     col="blue", pch=16)
+points(apply(porcent_Inv26,2,median, na.rm=T), apply(porcent_Inv85,2,median, na.rm=T), 
+     col="red", pch=16,)
+abline(c(0,1))
+
+
+plot(porcent_Rep26, porcent_Rep85, col="red", pch=c(15,16,17,8,25,9), xlim=c(-1,1), ylim=c(-1,1))
+points(porcent_Res26, porcent_Res85, col="blue",pch=c(15,16,17,8,25,9))
+points(porcent_Inv26, porcent_Inv85, col="green",pch=c(15,16,17,8,25,9))
+legend(x=0.8, y=0.45, pch=c(15,16,17,8,25,9), 
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"),
+       cex=1)
+abline(c(0,0), v=0)
+
+
+
+#matriz % mediana de area perdida/ganha dos bons modelos
+porcent_area_perdida<-cbind(cbind(rcp26_RES=apply(porcent_Res26,2,median, na.rm=T), rcp85_RES=apply(porcent_Res85,2,median, na.rm=T)),
+      cbind(rcp26_REP=apply(porcent_Rep26,2,median, na.rm=T), rcp26_REP=apply(porcent_Rep85,2,median, na.rm=T)),
+      cbind(rcp26_INV=apply(porcent_Inv26,2,median, na.rm=T), rcp26_INV=apply(porcent_Inv85,2,median, na.rm=T)))
+rownames(porcent_area_perdida)<-gsub("_0kRES", "",rownames(porcent_area_perdida))
+
+       rcp26_RES rcp85_RES rcp26_REP rcp26_REP rcp26_INV rcp26_INV
+CCSM   0.3653256 0.7765790 0.2858866 0.6574074 0.4837209 0.8946975
+FGOALS 0.2451613 0.7429577 0.3932039 1.0000000 0.5223535 0.9930876
+GISS   0.2190189 0.4289872 0.2705224 0.5641577 0.4655738 0.8886199
+IPSL   0.5527219 0.9127023 0.6371212 0.9460847 0.8491571 0.9696828
+MIROC  0.4596853 0.7637444 0.5362889 0.9604085 0.6011758 0.8529015
+MRI    0.2895682 0.6561967 0.1339733 0.4711493 0.6139601 0.9569159
+
+
+
+
+
+#########sobreposicao (Area ganho, Area perdido e Area mantido)######
+
+#Range invernada
+RangePerdido26_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",12,])[,-1]
+RangePerdido85_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",12,])[,-1]
+
+RangeGanho26_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",11,])[,-1]
+RangeGanho85_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",11,])[,-1]
+
+RangeMantido26_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",13,])[,-1]
+RangeMantido85_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",13,])[,-1]
+
+
+#plot perda e ganho de range areas de invernada bons modelos
+plot(RangeGanho26_inv6bons[,1]~RangePerdido26_inv6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho26_inv6bons[,2]~RangePerdido26_inv6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho26_inv6bons[,3]~RangePerdido26_inv6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho26_inv6bons[,4]~RangePerdido26_inv6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho26_inv6bons[,5]~RangePerdido26_inv6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho26_inv6bons[,6]~RangePerdido26_inv6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+plot(RangeGanho85_inv6bons[,1]~RangePerdido85_inv6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho85_inv6bons[,2]~RangePerdido85_inv6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho85_inv6bons[,3]~RangePerdido85_inv6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho85_inv6bons[,4]~RangePerdido85_inv6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho85_inv6bons[,5]~RangePerdido85_inv6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho85_inv6bons[,6]~RangePerdido85_inv6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+plot(RangeMantido85_inv6bons[,1]~RangeMantido26_inv6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeMantido85_inv6bons[,2]~RangeMantido26_inv6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeMantido85_inv6bons[,3]~RangeMantido26_inv6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeMantido85_inv6bons[,4]~RangeMantido26_inv6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeMantido85_inv6bons[,5]~RangeMantido26_inv6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeMantido85_inv6bons[,6]~RangeMantido26_inv6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+#Range reproducao
+RangePerdido26_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",12,])[,-1]
+RangePerdido85_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",12,])[,-1]
+
+RangeGanho26_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",11,])[,-1]
+RangeGanho85_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",11,])[,-1]
+
+RangeMantido26_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",13,])[,-1]
+RangeMantido85_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",13,])[,-1]
+
+#plot perda e ganho de range areas de reproducao bons modelos
+plot(RangeGanho26_rep6bons[,1]~RangePerdido26_rep6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho26_rep6bons[,2]~RangePerdido26_rep6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho26_rep6bons[,3]~RangePerdido26_rep6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho26_rep6bons[,4]~RangePerdido26_rep6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho26_rep6bons[,5]~RangePerdido26_rep6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho26_rep6bons[,6]~RangePerdido26_rep6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+plot(RangeGanho85_rep6bons[,1]~RangePerdido85_rep6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho85_rep6bons[,2]~RangePerdido85_rep6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho85_rep6bons[,3]~RangePerdido85_rep6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho85_rep6bons[,4]~RangePerdido85_rep6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho85_rep6bons[,5]~RangePerdido85_rep6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho85_rep6bons[,6]~RangePerdido85_rep6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+plot(RangeMantido85_rep6bons[,1]~RangeMantido26_rep6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeMantido85_rep6bons[,2]~RangeMantido26_rep6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeMantido85_rep6bons[,3]~RangeMantido26_rep6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeMantido85_rep6bons[,4]~RangeMantido26_rep6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeMantido85_rep6bons[,5]~RangeMantido26_rep6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeMantido85_rep6bons[,6]~RangeMantido26_rep6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+#Range residencia
+RangePerdido26_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",12,])[,-1]
+RangePerdido85_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",12,])[,-1]
+
+RangeGanho26_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",11,])[,-1]
+RangeGanho85_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",11,])[,-1]
+
+RangeMantido26_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",13,])[,-1]
+RangeMantido85_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",13,])[,-1]
+
+#plot perda e ganho de range areas de resroducao bons modelos
+plot(RangeGanho26_res6bons[,1]~RangePerdido26_res6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho26_res6bons[,2]~RangePerdido26_res6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho26_res6bons[,3]~RangePerdido26_res6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho26_res6bons[,4]~RangePerdido26_res6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho26_res6bons[,5]~RangePerdido26_res6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho26_res6bons[,6]~RangePerdido26_res6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+plot(RangeGanho85_res6bons[,1]~RangePerdido85_res6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeGanho85_res6bons[,2]~RangePerdido85_res6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeGanho85_res6bons[,3]~RangePerdido85_res6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeGanho85_res6bons[,4]~RangePerdido85_res6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeGanho85_res6bons[,5]~RangePerdido85_res6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeGanho85_res6bons[,6]~RangePerdido85_res6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+plot(RangeMantido85_res6bons[,1]~RangeMantido26_res6bons[,1], xlim=c(0,1), ylim=c(0,1),col="red", pch=16)
+points(RangeMantido85_res6bons[,2]~RangeMantido26_res6bons[,2], xlim=c(0,1), ylim=c(0,1),col="purple", pch=16)
+points(RangeMantido85_res6bons[,3]~RangeMantido26_res6bons[,3], xlim=c(0,1), ylim=c(0,1),col="black", pch=16)
+points(RangeMantido85_res6bons[,4]~RangeMantido26_res6bons[,4], xlim=c(0,1), ylim=c(0,1),col="darkgreen", pch=16)
+points(RangeMantido85_res6bons[,5]~RangeMantido26_res6bons[,5], xlim=c(0,1), ylim=c(0,1),col="blue", pch=16)
+points(RangeMantido85_res6bons[,6]~RangeMantido26_res6bons[,6], xlim=c(0,1), ylim=c(0,1),col="orange", pch=16)
+legend(x=0, y=1, pch=16, col=c("red", "purple", "black", "darkgreen", "blue", "orange"),
+       legend=c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), cex=0.8)
+abline(c(0,1))
+
+
+##latitude bons
+latCentro0k_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",6,])[,-1]
+latCentro0k_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",6,])[,-1]
+latCentro0k_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",6,])[,-1]
+
+
+latCentro26_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",6,])[,-1]
+latCentro26_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",6,])[,-1]
+latCentro26_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",6,])[,-1]
+
+
+latCentro85_inv6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",6,])[,-1]
+latCentro85_rep6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",6,])[,-1]
+latCentro85_res6bons <- t(aves_migratorias_model6bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",6,])[,-1]
+
+#latitude 0k x lat26 x lat85
+plot(abs(latCentro85_inv6bons)-abs(latCentro0k_inv6bons),abs(latCentro26_inv6bons)-abs(latCentro0k_inv6bons))
+abline(v=0, h=0)
+
+plot(latCentro85_rep6bons-latCentro0k_rep6bons,latCentro26_rep6bons-latCentro0k_rep6bons)
+abline(v=0, h=0)
+
+plot(abs(latCentro85_rep6bons)-abs(latCentro0k_rep6bons)~latCentro0k_rep6bons)
+
+plot(abs(latCentro26_rep6bons)-abs(latCentro0k_rep6bons)~latCentro0k_rep6bons)
+
+
+
+##range perdido x latitude
+#invernada
+plot(RangePerdido26_inv6bons[,1]~latCentro0k_inv6bons[,1], col="red", pch=16)
+points(RangePerdido26_inv6bons[,2]~latCentro0k_inv6bons[,2], col="purple", pch=16)
+points(RangePerdido26_inv6bons[,3]~latCentro0k_inv6bons[,3], col="black", pch=16)
+points(RangePerdido26_inv6bons[,4]~latCentro0k_inv6bons[,4], col="green", pch=16)
+points(RangePerdido26_inv6bons[,5]~latCentro0k_inv6bons[,5], col="blue", pch=16)
+points(RangePerdido26_inv6bons[,6]~latCentro0k_inv6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+
+plot(RangePerdido85_inv6bons[,1]~latCentro0k_inv6bons[,1], col="red", pch=16)
+points(RangePerdido85_inv6bons[,2]~latCentro0k_inv6bons[,2], col="purple", pch=16)
+points(RangePerdido85_inv6bons[,3]~latCentro0k_inv6bons[,3], col="black", pch=16)
+points(RangePerdido85_inv6bons[,4]~latCentro0k_inv6bons[,4], col="green", pch=16)
+points(RangePerdido85_inv6bons[,5]~latCentro0k_inv6bons[,5], col="blue", pch=16)
+points(RangePerdido85_inv6bons[,6]~latCentro0k_inv6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+
+#reproducao
+plot(RangePerdido26_rep6bons[,1]~latCentro0k_rep6bons[,1], col="red", pch=16)
+points(RangePerdido26_rep6bons[,2]~latCentro0k_rep6bons[,2], col="purple", pch=16)
+points(RangePerdido26_rep6bons[,3]~latCentro0k_rep6bons[,3], col="black", pch=16)
+points(RangePerdido26_rep6bons[,4]~latCentro0k_rep6bons[,4], col="green", pch=16)
+points(RangePerdido26_rep6bons[,5]~latCentro0k_rep6bons[,5], col="blue", pch=16)
+points(RangePerdido26_rep6bons[,6]~latCentro0k_rep6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+
+plot(RangePerdido85_rep6bons[,1]~latCentro0k_rep6bons[,1], col="red", pch=16)
+points(RangePerdido85_rep6bons[,2]~latCentro0k_rep6bons[,2], col="purple", pch=16)
+points(RangePerdido85_rep6bons[,3]~latCentro0k_rep6bons[,3], col="black", pch=16)
+points(RangePerdido85_rep6bons[,4]~latCentro0k_rep6bons[,4], col="green", pch=16)
+points(RangePerdido85_rep6bons[,5]~latCentro0k_rep6bons[,5], col="blue", pch=16)
+points(RangePerdido85_rep6bons[,6]~latCentro0k_rep6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+#residencia
+plot(RangePerdido26_res6bons[,1]~latCentro0k_res6bons[,1], col="red", pch=16)
+points(RangePerdido26_res6bons[,2]~latCentro0k_res6bons[,2], col="purple", pch=16)
+points(RangePerdido26_res6bons[,3]~latCentro0k_res6bons[,3], col="black", pch=16)
+points(RangePerdido26_res6bons[,4]~latCentro0k_res6bons[,4], col="green", pch=16)
+points(RangePerdido26_res6bons[,5]~latCentro0k_res6bons[,5], col="blue", pch=16)
+points(RangePerdido26_res6bons[,6]~latCentro0k_res6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+plot(RangePerdido85_res6bons[,1]~latCentro0k_res6bons[,1], col="red", pch=16)
+points(RangePerdido85_res6bons[,2]~latCentro0k_res6bons[,2], col="purple", pch=16)
+points(RangePerdido85_res6bons[,3]~latCentro0k_res6bons[,3], col="black", pch=16)
+points(RangePerdido85_res6bons[,4]~latCentro0k_res6bons[,4], col="green", pch=16)
+points(RangePerdido85_res6bons[,5]~latCentro0k_res6bons[,5], col="blue", pch=16)
+points(RangePerdido85_res6bons[,6]~latCentro0k_res6bons[,6], col="orange", pch=16)
+abline(v=0)
+
+
+
+
 ### sentido da Mudanca nos centroides
 #reproducao
 centRep_Bons_lat0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5,])[,-1]
@@ -12,39 +637,87 @@ centRep_Bons_lat0k_85<-centRep_Bons_lat85-centRep_Bons_lat0k
 centRep_Bons_long0k_26<-centRep_Bons_long26-centRep_Bons_long0k
 centRep_Bons_long0k_85<-centRep_Bons_long85-centRep_Bons_long0k
 
-centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26<0 #centroide deslocou para SW
-centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26>0 #centroide deslocou para SE
-centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26>0 #centroide deslocou para NE
-centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26<0 #centroide deslocou para NW
-
+Sentido_Bons_0k_26 <- matrix(nrow=nrow(centRep_Bons_lat0k_26), ncol=ncol(centRep_Bons_lat0k_26), dimnames = dimnames(centRep_Bons_lat0k_26))
+Sentido_Bons_0k_26[centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26<0] <- "SW" #centroide deslocou para SW
+Sentido_Bons_0k_26[centRep_Bons_lat0k_26<0 & centRep_Bons_long0k_26>0] <- "SE" #centroide deslocou para SE
+Sentido_Bons_0k_26[centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26>0] <- "NE" #centroide deslocou para NE
+Sentido_Bons_0k_26[centRep_Bons_lat0k_26>0 & centRep_Bons_long0k_26<0] <- "NW" #centroide deslocou para NW
+Sentido_Bons_0k_26_sul <- Sentido_Bons_0k_26[rowMeans(centRep_Bons_long0k,na.rm = T)<0,]
+Sentido_Bons_0k_26_norte <- Sentido_Bons_0k_26[rowMeans(centRep_Bons_long0k,na.rm = T)>0,]
 centRep_Bons_lat0k_85<0 & centRep_Bons_long0k_85<0 #centroide deslocou para SW
 centRep_Bons_lat0k_85<0 & centRep_Bons_long0k_85>0 #centroide deslocou para SE
 centRep_Bons_lat0k_85>0 & centRep_Bons_long0k_85>0 #centroide deslocou para NE
 centRep_Bons_lat0k_85>0 & centRep_Bons_long0k_85<0 #centroide deslocou para NW
 
 
+#residencia
+centRes_Bons_lat0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="0k",5,])[,-1]
+centRes_Bons_lat26<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="26",5,])[,-1]
+centRes_Bons_lat85<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="85",5,])[,-1]
+centRes_Bons_long0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="0k",6,])[,-1]
+centRes_Bons_long26<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="26",6,])[,-1]
+centRes_Bons_long85<-t(aves_migratorias_model6bons[nomes_index4$fase=="Res" & nomes_index4$epoca=="85",6,])[,-1]
 
+centRes_Bons_lat0k_26<-centRes_Bons_lat26-centRes_Bons_lat0k
+centRes_Bons_lat0k_85<-centRes_Bons_lat85-centRes_Bons_lat0k
+centRes_Bons_long0k_26<-centRes_Bons_long26-centRes_Bons_long0k
+centRes_Bons_long0k_85<-centRes_Bons_long85-centRes_Bons_long0k
+
+centRes_Bons_lat0k_26<0 & centRes_Bons_long0k_26<0 #centroide deslocou para SW
+centRes_Bons_lat0k_26<0 & centRes_Bons_long0k_26>0 #centroide deslocou para SE
+centRes_Bons_lat0k_26>0 & centRes_Bons_long0k_26>0 #centroide deslocou para NE
+centRes_Bons_lat0k_26>0 & centRes_Bons_long0k_26<0 #centroide deslocou para NW
+
+centRes_Bons_lat0k_85<0 & centRes_Bons_long0k_85<0 #centroide deslocou para SW
+centRes_Bons_lat0k_85<0 & centRes_Bons_long0k_85>0 #centroide deslocou para SE
+centRes_Bons_lat0k_85>0 & centRes_Bons_long0k_85>0 #centroide deslocou para NE
+centRes_Bons_lat0k_85>0 & centRes_Bons_long0k_85<0 #centroide deslocou para NW
+
+
+#Residencia
+centRes_Bons_lat0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5,])[,-1]
+centRes_Bons_lat26<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5,])[,-1]
+centRes_Bons_lat85<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5,])[,-1]
+centRes_Bons_long0k<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",6,])[,-1]
+centRes_Bons_long26<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",6,])[,-1]
+centRes_Bons_long85<-t(aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",6,])[,-1]
+
+centRes_Bons_lat0k_26<-centRes_Bons_lat26-centRes_Bons_lat0k
+centRes_Bons_lat0k_85<-centRes_Bons_lat85-centRes_Bons_lat0k
+centRes_Bons_long0k_26<-centRes_Bons_long26-centRes_Bons_long0k
+centRes_Bons_long0k_85<-centRes_Bons_long85-centRes_Bons_long0k
+
+centRes_Bons_lat0k_26<0 & centRes_Bons_long0k_26<0 #centroide deslocou para SW
+centRes_Bons_lat0k_26<0 & centRes_Bons_long0k_26>0 #centroide deslocou para SE
+centRes_Bons_lat0k_26>0 & centRes_Bons_long0k_26>0 #centroide deslocou para NE
+centRes_Bons_lat0k_26>0 & centRes_Bons_long0k_26<0 #centroide deslocou para NW
+
+centRes_Bons_lat0k_85<0 & centRes_Bons_long0k_85<0 #centroide deslocou para SW
+centRes_Bons_lat0k_85<0 & centRes_Bons_long0k_85>0 #centroide deslocou para SE
+centRes_Bons_lat0k_85>0 & centRes_Bons_long0k_85>0 #centroide deslocou para NE
+centRes_Bons_lat0k_85[which(centRes_Bons_lat0k_85>0 & centRes_Bons_long0k_85<0)]) #centroide deslocou para NW
 
 
 #distancias de migracao!! **a cereja do bolo**
 library(geosphere)
 
-
 distVincentyEllipsoid(p1=aves_migratorias_model6bons[nomes_index4$fase=="RES",5:6,1][2,],p2=aves_migratorias_model6bons[nomes_index4$fase=="RES",5:6,1][3,])/1000
-
 midInv_0k<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="0k",5:6,][-1,,]
-midInv_26<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="26",5:6,][-1,,]
-midInv_85<-aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="85",5:6,][-1,,]
+aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="26",5:6,][-1,,]
+aves_migratorias_model6bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="85",5:6,][-1,,]
 
 midRep_0k<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5:6,][-1,,]
-midRep_26<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5:6,][-1,,]
-midRep_26<-aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5:6,][-1,,]
 
-midRes_0k<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5:6,][-1,,]
-midRes_26<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5:6,][-1,,]
-midRes_85<-aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5:6,][-1,,]
+DistInvRep0k <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRep0k)){
+DistInvRep0k[i,] <- distVincentyEllipsoid(p1=midInv_0k[,,i], p2=midRep_0k[,,i])/1000
+}
 
-array(midInv_0k, midRep_0k)
-array(midInv_26, midRep_26)
+aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5:6,][-1,,]
+aves_migratorias_model6bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5:6,][-1,,]
 
-...
+aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5:6,][-1,,]
+aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5:6,][-1,,]
+aves_migratorias_model6bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+apply()
