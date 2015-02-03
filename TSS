@@ -1,0 +1,33 @@
+
+sens_spec_model4<-array(dim=c(57,9,77))
+dimnames(sens_spec_model4)[[3]]<-dimnames(aves_migratorias_model4)[[3]]
+dimnames(sens_spec_model4)[[1]]<-dimnames(aves_migratorias_model4)[[1]]
+dimnames(sens_spec_model4)[[2]]<-c("a", "b", "c", "d", "sensibilidade", "especificidade", "falso negativo", "falso positivo", "TSS")
+
+
+#a =  n_cel_acerto = 1's corretos
+sens_spec_model4[,1,]<-aves_migratorias_model4[,15,]
+
+#b = n_cel_sobrep
+sens_spec_model4[,2,]<-aves_migratorias_model4[,14,]
+
+#c = n_cel_subpre
+sens_spec_model4[,3,]<-aves_migratorias_model4[,13,]
+
+#d = 0's corretos
+sens_spec_model4[,4,]<-21014-(aves_migratorias_model4[,13,]+aves_migratorias_model4[,14,]+aves_migratorias_model4[,15,])
+
+#sensibilidade
+sens_spec_model4[,5,]<-sens_spec_model4[,1,]/(sens_spec_model4[,1,]+sens_spec_model4[,3,])
+
+#especificidade
+sens_spec_model4[,6,]<-sens_spec_model4[,4,]/(sens_spec_model4[,2,]+sens_spec_model4[,4,])
+
+#erros de omissão 
+sens_spec_model4[,7,]<-sens_spec_model4[,3,]/(sens_spec_model4[,3,]+sens_spec_model4[,1,])
+
+#erros de comissão 
+sens_spec_model4[,8,]<-sens_spec_model4[,2,]/(sens_spec_model4[,2,]+sens_spec_model4[,4,])
+
+#TSS
+sens_spec_model4[,9,]<-(sens_spec_model4[,5,]+sens_spec_model4[,6,])-1
