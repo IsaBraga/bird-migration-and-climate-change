@@ -1,47 +1,9 @@
-library (SDMTools)
-library (raster)
-library (dismo)
-library (rgdal)
-library(maptools)
-library(outliers)
-library(rgeos)
-
-###script para área de residencia, invernada e reproducao separadas
-#script modelo 6
-##corte da adequabilidade calculado individualmente por spp e modelo,  fator de correcao do acerto=1.3
-
-#source("breeding_birds.R")
-#source("eliminate_outlier.R") 23 variaveis, output=data_new
-#source("eliminate_outlier_res.R") 19 variaveis, output=data_new
-#source("reclass.R") #reclassify considerando o erro
-
-#pasta com todos os shapes e com todos os modelos climaticos
-setwd("/media/leo/Seagate Expansion Drive/Tyrannidae")
-setwd("G:/Tyrannidae")
-setwd("D:/Ecologia/projeto_migracao_X_ mudancas_climaticas/scrip_aves_migratorias/Bioclim_Tyrannidae")
-
-
-#objetos necessários
-clima_JJA<-dir(pattern="JJA.grd")
-clima_DJF<-dir(pattern="DJF.grd")
-clima_anual<-dir(patter="_anual.grd")
-shapes<-dir(pattern=".shp")
-sudamerica<-raster("sudamerica.grd")
-northamerica<-raster("northamerica.grd")
-americas_rst<-raster("americas_rst.grd")
-america_rst0<-raster("america_rst0.grd")
-nomes_linhas<-read.table("nomes_linhas.txt", h=F)
-nomes_linhas_modelo4<-read.table("nomes_linhas_modelo4.txt", h=F)
-spp_hem<-read.table("spp_hem_modelo4.txt", h=TRUE)
-
-###Funcao###
-
 run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
-  resultados_spp<- array(dim=c(57,14,77))
+  resultados_spp<- array(dim=c(57,16,77))
   dimnames(resultados_spp)[[3]]<-gsub(".shp", "", shapes)
-  dimnames(resultados_spp)[[2]]<-c("long_min","lat","long_max","lat","midpoint_x", "midpoint_y","n_cells", "acerto", 
-                                   "sobrepredicao", "adequabil_corte", "range_ganho", "range_perdido", "range_mantido", 
-                                   "TSS", "n_cel_sobrep", "n_cel_acerto", "n_cel_subpre")
+  dimnames(resultados_spp)[[2]]<-c("long_min","lat","long_max","lat","midpoint_x", "midpoint_y","n_cells", "prop_acerto", 
+                                   "prop_sobrepredicao", "range_ganho", "range_perdido", "range_mantido", 
+                                   "n_cel_subpre", "n_cel_sobrep", "n_cel_acerto1", "n_cel_acerto0")
   dimnames(resultados_spp)[[1]]<-nomes_linhas_modelo4[,1]
   
   Sraster_rep0k<-stack(america_rst0, america_rst0, america_rst0, america_rst0, america_rst0, america_rst0)
@@ -51,7 +13,7 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
   Sraster_inv0k<-Sraster_rep0k
   Sraster_inv26<-Sraster_rep0k
   Sraster_inv85<-Sraster_rep0k
- 
+  
   Sraster_res0k<-Sraster_rep0k
   Sraster_res26<-Sraster_rep0k
   Sraster_res85<-Sraster_rep0k
@@ -61,13 +23,12 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
     reproduccion<-breeding_birds(paxaro)
     if(!is.null(reproduccion)){
       reproduccion<-gUnaryUnion(reproduccion)}
-    invernada<- nonbreeding_birds(paxaro) 
+    invernada<- nonbreeding_birds(paxaro)
     if(!is.null(invernada)){
       invernada<-gUnaryUnion(invernada)}
     residencia<-resident_birds(paxaro)
     if(!is.null(residencia)){
-      residencia<-gUnaryUnion(residencia)} 
-    
+      residencia<-gUnaryUnion(residencia)}
     print(shapes[i])
     
     # latitude e longitude min e max dos shapes
@@ -78,9 +39,8 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
         resultados_spp[1,c(1:4),i]<- c(apply(reproduccion_point[,c(1:2)], 2, min),apply(reproduccion_point[,c(1:2)], 2, max))
         resultados_spp[1,7,i]<-nrow(reproduccion_point)
         resultados_spp[1,c(5,6),i]<- apply(reproduccion_point[,c(1:2)],2,mean)
-      }    
+      }
     }
-    
     if(!is.null(invernada)){
       invernada_rst<-rasterize(invernada, americas_rst )
       invernada_point<-rasterToPoints(invernada_rst)
@@ -90,8 +50,6 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
         resultados_spp[2,c(5,6),i]<- apply(invernada_point[,c(1:2)],2,mean)
       }
     }
-    
-    
     if(!is.null(residencia) ){
       residencia_rst<-rasterize(residencia, americas_rst )
       residencia_point<-rasterToPoints(residencia_rst)
@@ -136,229 +94,192 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
       # modelo area de reproducao #
       if(!is.null(reproduccion)){
         if(nrow(reproduccion_point)>0){
-          
           clima_reproducao<-brick(clima_rep[j])
           
           #0k
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]),"_", "0k","REP", sep=""))
           
-          reproduccion_rst2<-merge(crop(reproduccion_rst, recorte), recorte)
           # nicho climatico
-          data_new_rep<-eliminate_outliers(climate=clima_reproducao, distribution=reproduccion)
-          map_rep<- bioclim (data_new_rep)
-          rep_model<-predict(clima_reproducao[[c(1:23)]], map_rep)
-          adequab_rep <- optimise(reclass_rep, interval = c(0,max(rep_model@data@values, na.rm=T)), obj_model=rep_model, shape_rst=reproduccion_rst2, cortar_rep=recorte)$minimum
-          final_rep0k<-crop(reclassify(rep_model, c(0,adequab_rep,0,adequab_rep,+Inf,1))*2, recorte)
-          validate_repro<-reproduccion_rst2+final_rep0k
+          minmax_rep<-eliminate_outliers(climate=clima_reproducao, distribution=reproduccion)
+          map_rep<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=1, b=23)
+          rep_model0k<-crop(map_rep*2, recorte)
           
-          ## validacao area de reproducao
-          #performance do modelo: acerto, sobrepredicao e corte de adequabilidade 
-          resultados_spp[(j-1)*9+4,8,i]<-  length(which(validate_repro@data@values==3))/length(which(reproduccion_rst2@data@values==1))
-          resultados_spp[(j-1)*9+4,9,i]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst2@data@values==1))
-          resultados_spp[(j-1)*9+4,10,i]<- adequab_rep
-          resultados_spp[(j-1)*9+4,14,i]<-length(which(validate_repro@data@values==2))/(21014-length(which(reproduccion_rst2@data@values==1)))
-          resultados_spp[(j-1)*9+4,15,i]<-length(which(validate_repro@data@values==2))
-          resultados_spp[(j-1)*9+4,16,i]<-length(which(validate_repro@data@values==3))
-          resultados_spp[(j-1)*9+4,17,i]<-length(which(validate_repro@data@values==1))
-          
-          
-          #localizaçao, centroide e area
-          rep_model_point<-rasterToPoints(final_rep0k)
+          # localizaçao, centroide e area
+          rep_model_point<-rasterToPoints(rep_model0k)
           rep_model_point<-matrix(rep_model_point[rep_model_point[,3]==2,1:2],ncol=2)
           
           if(nrow(rep_model_point)>0){
-            # latitude e longitude e longitude min e max
-            resultados_spp[(j-1)*9+4,c(1:4),i]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max))
-            #centroide da area de reproducao 0k
-            resultados_spp[(j-1)*9+4,c(5,6),i]<- apply(rep_model_point,2,mean)
+            resultados_spp[(j-1)*9+4,c(1:4),i]<- c(apply(rep_model_point, 2, min),apply(rep_model_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+4,c(5,6),i]<- apply(rep_model_point,2,mean) #centroide
           }
-          #area do modelo
-          resultados_spp[(j-1)*9+4,7,i]<-length(which(final_rep0k@data@values==2))
+          resultados_spp[(j-1)*9+4,7,i]<-length(which(rep_model0k@data@values==2)) #area do modelo
+          
+          # validacao area de reproducao
+          reproduccion_rst2<-merge(crop(reproduccion_rst, recorte), recorte)
+          validate_repro<-reproduccion_rst2+rep_model0k
+          
+          #performance do modelo
+          resultados_spp[(j-1)*9+4,8,i]<- length(which(validate_repro@data@values==3))/length(which(reproduccion_rst2@data@values==1)) #% acerto
+          resultados_spp[(j-1)*9+4,9,i]<- length(which(validate_repro@data@values==2))/length(which(reproduccion_rst2@data@values==1)) #% sobrepredicao
+          resultados_spp[(j-1)*9+4,13,i]<-length(which(validate_repro@data@values==1)) #n_cel_subpre
+          resultados_spp[(j-1)*9+4,14,i]<-length(which(validate_repro@data@values==2)) #n_cel_sobrep
+          resultados_spp[(j-1)*9+4,15,i]<-length(which(validate_repro@data@values==3)) #n_cel_acerto1
+          resultados_spp[(j-1)*9+4,16,i]<-21014-(length(which(validate_repro@data@values==1))+length(which(validate_repro@data@values==2))+length(which(validate_repro@data@values==3))) #n_cel_acerto0  
           
           #raster riqueza
-          Sraster_rep0k@layers[[j]]<-(merge(final_rep0k/2, america_rst0))+Sraster_rep0k@layers[[j]]
+          Sraster_rep0k@layers[[j]]<-(merge(rep_model0k/2, america_rst0))+Sraster_rep0k@layers[[j]]
           
           
-          # predict rcp 26    
-          print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))  
+          # predict rcp 26
+          print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","26","REP", sep=""))
           
-          clima_26rep<-clima_reproducao[[24:46]]
-          names(clima_26rep)<-names(clima_reproducao[[1:23]])
-          rep_model26<-predict(map_rep,clima_26rep)
-          final_rep26<-crop(reclassify(rep_model26, c(0,adequab_rep,0,adequab_rep,+Inf,1)), recorte)
+          rep_model26<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=24, b=46)
+          rep_model26<-crop(rep_model26, recorte)
           
-          #localizaçao, centroide e area
-          rep_model26_point<-rasterToPoints(final_rep26)
+          # localizaçao, centroide e area
+          rep_model26_point<-rasterToPoints(rep_model26)
           rep_model26_point<-matrix(rep_model26_point[rep_model26_point[,3]==1,c(1:2)],ncol=2)
           
           if(nrow(rep_model26_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+5,c(1:4),i]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max))
-            # centroide da area de reproducao 26
-            resultados_spp[(j-1)*9+5,c(5,6),i]<- apply(rep_model26_point,2,mean)
+            resultados_spp[(j-1)*9+5,c(1:4),i]<- c(apply(rep_model26_point, 2, min),apply(rep_model26_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+5,c(5,6),i]<- apply(rep_model26_point,2,mean) #centroide 
           }
-          # area do modelo
-          resultados_spp[(j-1)*9+5,7,i]<-length(which(final_rep26@data@values==1))
+          resultados_spp[(j-1)*9+5,7,i]<-length(which(rep_model26@data@values==1)) # area
           
           #sobreposicao do range 26 x 0k
-          sobreposicao_rep26<-final_rep0k+final_rep26
-          resultados_spp[(j-1)*9+5,11,i]<-length(which(sobreposicao_rep26@data@values==1))/length(which(final_rep0k@data@values==2))
-          resultados_spp[(j-1)*9+5,12,i]<-length(which(sobreposicao_rep26@data@values==2))/length(which(final_rep0k@data@values==2))
-          resultados_spp[(j-1)*9+5,13,i]<-length(which(sobreposicao_rep26@data@values==3))/length(which(final_rep0k@data@values==2))
+          sobreposicao_rep26<-rep_model0k+rep_model26
+          resultados_spp[(j-1)*9+5,10,i]<-length(which(sobreposicao_rep26@data@values==1))/length(which(rep_model0k@data@values==2))
+          resultados_spp[(j-1)*9+5,11,i]<-length(which(sobreposicao_rep26@data@values==2))/length(which(rep_model0k@data@values==2))
+          resultados_spp[(j-1)*9+5,12,i]<-length(which(sobreposicao_rep26@data@values==3))/length(which(rep_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_rep26@layers[[j]]<-(merge(final_rep26, america_rst0))+Sraster_rep26@layers[[j]]
+          Sraster_rep26@layers[[j]]<-(merge(rep_model26, america_rst0))+Sraster_rep26@layers[[j]]
           
           # predict rcp 85
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_rep[j]), "_","85","REP", sep=""))
           
-          clima_85rep<-clima_reproducao[[47:69]]
-          names(clima_85rep)<-names(clima_reproducao[[1:23]])
-          rep_model85<-predict(map_rep,clima_85rep)
-          final_rep85<-crop(reclassify(rep_model85, c(0,adequab_rep,0,adequab_rep,+Inf,1)), recorte)
-          rep_model85_point<-rasterToPoints(final_rep85)
-          rep_model85_point<-matrix(rep_model85_point[rep_model85_point[,3]==1,c(1:2)],ncol=2)
+          rep_model85<-reclas_map (minmax=minmax_rep, climate=clima_reproducao, a=47, b=69)
+          rep_model85<-crop(rep_model85, recorte)
+          
+          # localizaçao, centroide e area
+          rep_model85_point<-rasterToPoints(rep_model85)
+          rep_model85_point<-matrix(rep_model85_point[rep_model85_point[,3]==1,c(1:2)], ncol=2)
           
           if(nrow(rep_model85_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+6,c(1:4),i]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max))
-            #centroide da area de reproducao 85
-            resultados_spp[(j-1)*9+6,c(5,6),i]<- apply(rep_model85_point,2,mean)
+            resultados_spp[(j-1)*9+6,c(1:4),i]<- c(apply(rep_model85_point, 2, min),apply(rep_model85_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+6,c(5,6),i]<- apply(rep_model85_point,2,mean) #centroide
           }
-          
-          # area da area de reproducao 85 
-          resultados_spp[(j-1)*9+6,7,i]<-length(which(final_rep85@data@values==1))
+          resultados_spp[(j-1)*9+6,7,i]<-length(which(rep_model85@data@values==1)) #area
           
           #sobreposicao do range 85 x 0k
-          sobreposicao_rep85<-final_rep0k+final_rep85
-          resultados_spp[(j-1)*9+6,11,i]<-length(which(sobreposicao_rep85@data@values==1))/length(which(final_rep0k@data@values==2))
-          resultados_spp[(j-1)*9+6,12,i]<-length(which(sobreposicao_rep85@data@values==2))/length(which(final_rep0k@data@values==2))
-          resultados_spp[(j-1)*9+6,13,i]<-length(which(sobreposicao_rep85@data@values==3))/length(which(final_rep0k@data@values==2))
+          sobreposicao_rep85<-rep_model0k+rep_model85
+          resultados_spp[(j-1)*9+6,10,i]<-length(which(sobreposicao_rep85@data@values==1))/length(which(rep_model0k@data@values==2))
+          resultados_spp[(j-1)*9+6,11,i]<-length(which(sobreposicao_rep85@data@values==2))/length(which(rep_model0k@data@values==2))
+          resultados_spp[(j-1)*9+6,12,i]<-length(which(sobreposicao_rep85@data@values==3))/length(which(rep_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_rep85@layers[[j]]<-(merge(final_rep85, america_rst0))+Sraster_rep85@layers[[j]]
+          Sraster_rep85@layers[[j]]<-(merge(rep_model85, america_rst0))+Sraster_rep85@layers[[j]]
           
-          #writeRaster(stack(final_rep0k, final_rep26, final_rep85), paste("./mapas/", gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""),overwrite=TRUE)
-          rm(clima_reproducao, reproduccion_rst2, data_new_rep, map_rep, rep_model, adequab_rep, final_rep0k, validate_repro, rep_model_point,
-             clima_26rep, rep_model26,final_rep26, rep_model26_point, clima_85rep,  rep_model85, final_rep85, rep_model85_point)
+          
+          writeRaster(stack(rep_model0k, rep_model26, rep_model85), paste("./mapas/", gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_rep[j]), "_","REP", sep=""),overwrite=TRUE)
+          rm(clima_reproducao, reproduccion_rst2, rep_model0k, validate_repro, rep_model_point,
+             rep_model26, rep_model26_point, rep_model85, rep_model85_point)
         }
       }
-      
-      
-      
-      
-      
       ##### Modelo area de invernada #####
       if(!is.null(invernada)){
         if( nrow(invernada_point)>0){
-          clima_invernada<-brick(clima_inv[j])   
+          clima_invernada<-brick(clima_inv[j])
           
           # 0k
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]),"_","0k","INV", sep=""))
           
-          invernada_rst2<-merge(invernada_rst,america_rst0)
           # nicho climatico
-          data_new_inv<-eliminate_outliers(climate=clima_invernada, distribution=invernada)
-          map_inv<- bioclim (data_new_inv)
-          inv_model<-predict(map_inv,clima_invernada[[1:25]])
-          adequab_inv <- optimise(reclass,interval = c(0,max(inv_model@data@values, na.rm=T)),obj_model=inv_model,shape_rst=invernada_rst2, cortar=america_rst0)$minimum
-          final_inv0k<-crop(reclassify(inv_model, c(0,adequab_inv,0,adequab_inv,+Inf,1))*2, america_rst0)
+          minmax_inv<-eliminate_outliers (climate=clima_invernada, distribution=invernada)
+          map_inv<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=1, b=23)
+          inv_model0k<-crop(map_inv*2, america_rst0) 
+          
+          # localizaçao, centroide e area
+          inv_model_point<-rasterToPoints(inv_model0k)
+          inv_model_point<-matrix(inv_model_point[inv_model_point[,3]==2,c(1:2)],ncol=2)
+          
+          if(nrow(inv_model_point)>0){
+            resultados_spp[(j-1)*9+7,c(1:4),i]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+7,c(5,6),i]<- apply(inv_model_point,2,median) #centroide
+          }
+          resultados_spp[(j-1)*9+7,7,i]<-length(which(inv_model0k@data@values==2)) #area do modelo
           
           # validacao area de invernada
-          validate_inv<-invernada_rst2+final_inv0k
+          invernada_rst2<-merge(invernada_rst,america_rst0)
+          validate_inv<-invernada_rst2+inv_model0k
           
-          # performance do modelo: acertos e sobrepredicao
-          resultados_spp[(j-1)*9+7,8,i]<-  length(which(validate_inv@data@values==3))/length(which(invernada_rst2@data@values==1))
-          resultados_spp[(j-1)*9+7,9,i]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst2@data@values==1))
-          resultados_spp[(j-1)*9+7,10,i]<-adequab_inv
-          resultados_spp[(j-1)*9+7,14,i]<-length(which(validate_inv@data@values==2))/(21014-length(which(invernada_rst2@data@values==1)))
-          resultados_spp[(j-1)*9+7,15,i]<-length(which(validate_inv@data@values==2))
-          resultados_spp[(j-1)*9+7,16,i]<-length(which(validate_inv@data@values==3))
-          resultados_spp[(j-1)*9+7,17,i]<-length(which(validate_inv@data@values==1))
-          
-          #localizaçao, centroide e area
-          inv_model_point<-rasterToPoints(final_inv0k)
-          inv_model_point<-matrix(inv_model_point[inv_model_point[,3]==2,c(1:2)],ncol=2)
-          if(nrow(inv_model_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+7,c(1:4),i]<- c(apply(inv_model_point, 2, min),apply(inv_model_point, 2, max))
-            # centroide da area de invernada 0k
-            resultados_spp[(j-1)*9+7,c(5,6),i]<- apply(inv_model_point,2,median)
-          }
-          # area do modelo
-          resultados_spp[(j-1)*9+7,7,i]<-length(which(final_inv0k@data@values==2))
+          #performance do modelo
+          resultados_spp[(j-1)*9+7,8,i]<- length(which(validate_inv@data@values==3))/length(which(invernada_rst2@data@values==1)) #% acerto
+          resultados_spp[(j-1)*9+7,9,i]<- length(which(validate_inv@data@values==2))/length(which(invernada_rst2@data@values==1)) #% sobrepredicao
+          resultados_spp[(j-1)*9+7,13,i]<-length(which(validate_inv@data@values==1)) #n_cel_subpre
+          resultados_spp[(j-1)*9+7,14,i]<-length(which(validate_inv@data@values==2)) #n_cel_sobrep
+          resultados_spp[(j-1)*9+7,15,i]<-length(which(validate_inv@data@values==3)) #n_cel_acerto1
+          resultados_spp[(j-1)*9+7,16,i]<-21014-(length(which(validate_inv@data@values==1))+length(which(validate_inv@data@values==2))+length(which(validate_inv@data@values==3))) #n_cel_acerto0  
           
           #raster riqueza
-          Sraster_inv0k@layers[[j]]<-(final_inv0k/2)+Sraster_inv0k@layers[[j]]
+          Sraster_inv0k@layers[[j]]<-(merge(inv_model0k/2, america_rst0))+Sraster_inv0k@layers[[j]]
           
-          #predict rcp 26    
+          
+          #predict rcp 26
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","26","INV", sep=""))
           
-          clima_26inv<-clima_invernada[[24:46]]
-          names(clima_26inv)<-names(clima_invernada[[1:23]])
-          inv_model26<-predict(map_inv,clima_26inv)
-          final_inv26<-crop(reclassify(inv_model26, c(0,adequab_inv,0,adequab_inv,+Inf,1)), america_rst0)
+          inv_model26<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=24, b=46)
+          inv_model26<-crop(inv_model26, america_rst0)
           
-          inv_model26_point<-rasterToPoints(final_inv26)
+          # localizaçao, centroide e area
+          inv_model26_point<-rasterToPoints(inv_model26)
           inv_model26_point<-matrix(inv_model26_point[inv_model26_point[,3]==1,c(1:2)],ncol=2)
           
           if(nrow(inv_model26_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+8,c(1:4),i]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max))
-            # centroide da area de invernada 26
-            resultados_spp[(j-1)*9+8,c(5,6),i]<- apply(inv_model26_point,2,mean)
+            resultados_spp[(j-1)*9+8,c(1:4),i]<- c(apply(inv_model26_point, 2, min),apply(inv_model26_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+8,c(5,6),i]<- apply(inv_model26_point,2,mean) #centroide
           }
-          # area do modelo
-          resultados_spp[(j-1)*9+8,7,i]<-length(which(final_inv26@data@values==1))
-          
+          resultados_spp[(j-1)*9+8,7,i]<-length(which(inv_model26@data@values==1))
           
           #sobreposicao do range 26 x 0k
-          sobreposicao_inv26<-final_inv0k+final_inv26
-          resultados_spp[(j-1)*9+8,11,i]<-length(which(sobreposicao_inv26@data@values==1))/length(which(final_inv0k@data@values==2))
-          resultados_spp[(j-1)*9+8,12,i]<-length(which(sobreposicao_inv26@data@values==2))/length(which(final_inv0k@data@values==2))
-          resultados_spp[(j-1)*9+8,13,i]<-length(which(sobreposicao_inv26@data@values==3))/length(which(final_inv0k@data@values==2))
+          sobreposicao_inv26<-inv_model0k+inv_model26
+          resultados_spp[(j-1)*9+8,10,i]<-length(which(sobreposicao_inv26@data@values==1))/length(which(inv_model0k@data@values==2))
+          resultados_spp[(j-1)*9+8,11,i]<-length(which(sobreposicao_inv26@data@values==2))/length(which(inv_model0k@data@values==2))
+          resultados_spp[(j-1)*9+8,12,i]<-length(which(sobreposicao_inv26@data@values==3))/length(which(inv_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_inv26@layers[[j]]<-final_inv26+Sraster_inv26@layers[[j]]
-                    
+          Sraster_inv26@layers[[j]]<-(merge(inv_model26, america_rst0))+Sraster_inv26@layers[[j]]
+          
           #predict rcp 85
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_inv[j]), "_","85","INV", sep=""))
           
-          clima_85inv<-clima_invernada[[47:69]]
-          names(clima_85inv)<-names(clima_invernada[[1:23]])
-          inv_model85<-predict(map_inv,clima_85inv)
-          final_inv85<-crop(reclassify(inv_model85, c(0,adequab_inv,0,adequab_inv,+Inf,1)), america_rst0)
+          inv_model85<-reclas_map (minmax=minmax_inv, climate=clima_invernada, a=47, b=69)
+          inv_model85<-crop(inv_model85, america_rst0)
           
-          inv_model85_point<-rasterToPoints(final_inv85)
+          # localizaçao, centroide e area
+          inv_model85_point<-rasterToPoints(inv_model85)
           inv_model85_point<- matrix(inv_model85_point[inv_model85_point[,3]==1,c(1:2)], ncol=2)
           
-          if(!is.null(dim(inv_model85_point))){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+9,c(1:4),i]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max))
-            # centroide da area de invernada 85
-            resultados_spp[(j-1)*9+9,c(5:6),i]<- apply(inv_model85_point,2,mean)
-          }     
-          
-          # area do modelo
-          resultados_spp[(j-1)*9+9,7,i]<-length(which(final_inv85@data@values==1))
+          if(nrow(inv_model85_point)>0){
+            resultados_spp[(j-1)*9+9,c(1:4),i]<- c(apply(inv_model85_point, 2, min),apply(inv_model85_point, 2, max)) #lat e long max e min
+            resultados_spp[(j-1)*9+9,c(5:6),i]<- apply(inv_model85_point,2,mean) #centroide
+          }
+          resultados_spp[(j-1)*9+9,7,i]<-length(which(inv_model85@data@values==1)) #area
           
           #sobreposicao do range 85 x 0k
-          sobreposicao_inv85<-final_inv0k+final_inv85
-          resultados_spp[(j-1)*9+9,11,i]<-length(which(sobreposicao_inv85@data@values==1))/length(which(final_inv0k@data@values==2))
-          resultados_spp[(j-1)*9+9,12,i]<-length(which(sobreposicao_inv85@data@values==2))/length(which(final_inv0k@data@values==2))
-          resultados_spp[(j-1)*9+9,13,i]<-length(which(sobreposicao_inv85@data@values==3))/length(which(final_inv0k@data@values==2))
+          sobreposicao_inv85<-inv_model0k+inv_model85
+          resultados_spp[(j-1)*9+9,10,i]<-length(which(sobreposicao_inv85@data@values==1))/length(which(inv_model0k@data@values==2))
+          resultados_spp[(j-1)*9+9,11,i]<-length(which(sobreposicao_inv85@data@values==2))/length(which(inv_model0k@data@values==2))
+          resultados_spp[(j-1)*9+9,12,i]<-length(which(sobreposicao_inv85@data@values==3))/length(which(inv_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_inv85@layers[[j]]<-final_inv85+Sraster_inv85@layers[[j]]
-                    
-          #writeRaster(stack(final_inv0k, final_inv26, final_inv85), paste("./mapas/",gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""),overwrite=TRUE)
-          rm(clima_invernada, invernada_rst2, data_new_inv, map_inv, inv_model, adequab_inv, final_inv0k, validate_inv, inv_model_point,
-             clima_26inv, inv_model26,final_inv26, inv_model26_point, clima_85inv,  inv_model85, final_inv85, inv_model85_point)
+          Sraster_inv85@layers[[j]]<-(merge(inv_model85, america_rst0))+Sraster_inv85@layers[[j]]
+          
+          writeRaster(stack(inv_model0k, inv_model26, inv_model85), paste("./mapas/",gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_inv[j]), "_","INV", sep=""),overwrite=TRUE)
+          rm(clima_invernada, invernada_rst2, inv_model, validate_inv, inv_model_point,
+             inv_model26, inv_model26_point, inv_model85, inv_model85_point)
         }
       }
-      
-      
-      
       ##### modelo area de residencia #####
       if(!is.null(residencia)){
         if(nrow(residencia_point)>0){
@@ -367,122 +288,105 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
           #0k
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]),"_", "0k","res", sep=""))
           
-          residencia_rst2<-merge(residencia_rst, america_rst0)
           # nicho climatico
-          data_new_res<-eliminate_outliers_res(climate=clima_residencia, distribution=residencia)
-          map_res<- bioclim (data_new_res)
-          res_model<-predict(clima_residencia[[c(1:19)]], map_res)
-          adequab_res <- optimise(reclass,interval = c(0,max(res_model@data@values, na.rm=T)),obj_model=res_model,shape_rst=residencia_rst2, cortar=america_rst0)$minimum
-          final_res0k<-crop(reclassify(res_model, c(0,adequab_res,0,adequab_res,+Inf,1))*2, america_rst0)
+          minmax_res<-eliminate_outliers_res(climate=clima_residencia, distribution=residencia)
+          res_model0k<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=1, b=19)
+          res_model0k<-crop(res_model0k*2, america_rst0)
           
-          # validacao area de residencia
-          validate_resid<-residencia_rst2+final_res0k
-          
-          #performance do modelo: acertos e sobresredicao
-          resultados_spp[(j-1)*9+10,8,i]<-  length(which(validate_resid@data@values==3))/length(which(residencia_rst2@data@values==1))
-          resultados_spp[(j-1)*9+10,9,i]<- length(which(validate_resid@data@values==2))/length(which(residencia_rst2@data@values==1))
-          resultados_spp[(j-1)*9+10,10,i]<-adequab_res
-          resultados_spp[(j-1)*9+10,14,i]<-length(which(validate_resid@data@values==2))/(21014-length(which(residencia_rst2@data@values==1)))
-          resultados_spp[(j-1)*9+10,15,i]<-length(which(validate_resid@data@values==2))
-          resultados_spp[(j-1)*9+10,16,i]<-length(which(validate_resid@data@values==3))
-          resultados_spp[(j-1)*9+10,17,i]<-length(which(validate_resid@data@values==1))
-          
-          res_model_point<-rasterToPoints(final_res0k)
+          # localizaçao, centroide e area
+          res_model_point<-rasterToPoints(res_model0k)
           res_model_point<-matrix(res_model_point[res_model_point[,3]==2,1:2], ncol=2)
           
           if(nrow(res_model_point)>0){
-            # latitude e longitude e longitude min e max
-            resultados_spp[(j-1)*9+10,c(1:4),i]<- c(apply(res_model_point, 2, min),apply(res_model_point, 2, max))
-            #centroide da area de residencia 0k
-            resultados_spp[(j-1)*9+10,c(5,6),i]<- apply(res_model_point,2,mean)
+            resultados_spp[(j-1)*9+10,c(1:4),i]<- c(apply(res_model_point, 2, min),apply(res_model_point, 2, max))#lat e long max e min
+            resultados_spp[(j-1)*9+10,c(5,6),i]<- apply(res_model_point,2,mean) #centroide
           }
+          resultados_spp[(j-1)*9+10,7,i]<-length(which(res_model0k@data@values==2)) #area do modelo
           
-          #area do modelo
-          resultados_spp[(j-1)*9+10,7,i]<-length(which(final_res0k@data@values==2))
+          # validacao area de residencia
+          residencia_rst2<-merge(residencia_rst, america_rst0)
+          validate_resid<-residencia_rst2+res_model0k
+          
+          #performance do modelo
+          resultados_spp[(j-1)*9+10,8,i]<- length(which(validate_resid@data@values==3))/length(which(residencia_rst2@data@values==1)) #% acerto
+          resultados_spp[(j-1)*9+10,9,i]<- length(which(validate_resid@data@values==2))/length(which(residencia_rst2@data@values==1)) #% sobrepredicao
+          resultados_spp[(j-1)*9+10,13,i]<-length(which(validate_resid@data@values==1)) #n_cel_subpre
+          resultados_spp[(j-1)*9+10,14,i]<-length(which(validate_resid@data@values==2)) #n_cel_sobrep
+          resultados_spp[(j-1)*9+10,15,i]<-length(which(validate_resid@data@values==3)) #n_cel_acerto1
+          resultados_spp[(j-1)*9+10,16,i]<-21014-(length(which(validate_resid@data@values==1))+length(which(validate_resid@data@values==2))+length(which(validate_resid@data@values==3))) #n_cel_acerto0  
           
           #raster riqueza
-          Sraster_res0k@layers[[j]]<-(final_res0k/2)+Sraster_res0k@layers[[j]]
+          Sraster_res0k@layers[[j]]<-(merge(res_model0k/2, america_rst0))+Sraster_res0k@layers[[j]]
           
-          # predict rcp 26    
-          print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]), "_","26","res", sep=""))  
           
-          clima_26res<-clima_residencia[[20:38]]
-          names(clima_26res)<-names(clima_residencia[[1:19]])
-          res_model26<-predict(map_res,clima_26res)
-          final_res26<-crop(reclassify(res_model26, c(0,adequab_res,0,adequab_res,+Inf,1)), america_rst0)
+          # predict rcp 26
+          print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]), "_","26","res", sep=""))
+          res_model26<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=20, b=38)
+          res_model26<-crop(res_model26, america_rst0)
           
-          res_model26_point<-rasterToPoints(final_res26)
-          res_model26_point<-matrix(res_model26_point[res_model26_point[,3]==1,c(1:2)], ncol=2) 
+          # localizaçao, centroide e area
+          res_model26_point<-rasterToPoints(res_model26)
+          res_model26_point<-matrix(res_model26_point[res_model26_point[,3]==1,c(1:2)], ncol=2)
           
           if(nrow(res_model26_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+11,c(1:4),i]<- c(apply(res_model26_point, 2, min),apply(res_model26_point, 2, max))
-            # centroide da area de residencia 26
-            resultados_spp[(j-1)*9+11,c(5,6),i]<- apply(res_model26_point,2,mean)
+            resultados_spp[(j-1)*9+11,c(1:4),i]<- c(apply(res_model26_point, 2, min),apply(res_model26_point, 2, max))#lat e long max e min
+            resultados_spp[(j-1)*9+11,c(5,6),i]<- apply(res_model26_point,2,mean) #centroide
           }
-          # area do modelo
-          resultados_spp[(j-1)*9+11,7,i]<-length(which(final_res26@data@values==1))
-          
+          resultados_spp[(j-1)*9+11,7,i]<-length(which(res_model26@data@values==1)) #area do modelo
           
           #sobreposicao do range 26 x 0k
-          sobreposicao_res26<-final_res0k+final_res26
-          resultados_spp[(j-1)*9+11,11,i]<-length(which(sobreposicao_res26@data@values==1))/length(which(final_res0k@data@values==2))
-          resultados_spp[(j-1)*9+11,12,i]<-length(which(sobreposicao_res26@data@values==2))/length(which(final_res0k@data@values==2))
-          resultados_spp[(j-1)*9+11,13,i]<-length(which(sobreposicao_res26@data@values==3))/length(which(final_res0k@data@values==2))
+          sobreposicao_res26<-res_model0k+res_model26
+          resultados_spp[(j-1)*9+11,10,i]<-length(which(sobreposicao_res26@data@values==1))/length(which(res_model0k@data@values==2))
+          resultados_spp[(j-1)*9+11,11,i]<-length(which(sobreposicao_res26@data@values==2))/length(which(res_model0k@data@values==2))
+          resultados_spp[(j-1)*9+11,12,i]<-length(which(sobreposicao_res26@data@values==3))/length(which(res_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_res26@layers[[j]]<-final_res26+Sraster_res26@layers[[j]]
+          Sraster_res26@layers[[j]]<-(merge(res_model26, america_rst0))+Sraster_res26@layers[[j]]
           
           # predict rcp 85
           print(paste(gsub(".shp", "", shapes[i]), "_", gsub(".grd", "", clima_res[j]), "_","85","res", sep=""))
           
-          clima_85res<-clima_residencia[[39:57]]
-          names(clima_85res)<-names(clima_residencia[[1:19]])
-          res_model85<-predict(map_res,clima_85res)
-          final_res85<-crop(reclassify(res_model85, c(0,adequab_res,0,adequab_res,+Inf,1)), america_rst0)
+          res_model85<-reclas_map (minmax=minmax_res, climate=clima_residencia, a=39, b=57)
+          res_model85<-crop(res_model85, america_rst0)
           
-          res_model85_point<-rasterToPoints(final_res85)
+          # localizaçao, centroide e area
+          res_model85_point<-rasterToPoints(res_model85)
           res_model85_point<-matrix(res_model85_point[res_model85_point[,3]==1,c(1:2)], ncol=2)
           
           if(nrow(res_model85_point)>0){
-            # latitude e longitude max e min
-            resultados_spp[(j-1)*9+12,c(1:4),i]<- c(apply(res_model85_point, 2, min),apply(res_model85_point, 2, max))
-            #centroide da area de residencia 85
-            resultados_spp[(j-1)*9+12,c(5,6),i]<- apply(res_model85_point,2,mean)
+            resultados_spp[(j-1)*9+12,c(1:4),i]<- c(apply(res_model85_point, 2, min),apply(res_model85_point, 2, max))#lat e long max e min
+            resultados_spp[(j-1)*9+12,c(5,6),i]<- apply(res_model85_point,2,mean) #centroide
           }
-          
-          
-          # area da area de residencia 85 
-          resultados_spp[(j-1)*9+12,7,i]<-length(which(final_res85@data@values==1))
-          
+          resultados_spp[(j-1)*9+12,7,i]<-length(which(res_model85@data@values==1)) #area do modelo
           
           #sobreposicao do range 85 x 0k
-          sobreposicao_res85<-final_res0k+final_res85
-          resultados_spp[(j-1)*9+12,11,i]<-length(which(sobreposicao_res85@data@values==1))/length(which(final_res0k@data@values==2))
-          resultados_spp[(j-1)*9+12,12,i]<-length(which(sobreposicao_res85@data@values==2))/length(which(final_res0k@data@values==2))
-          resultados_spp[(j-1)*9+12,13,i]<-length(which(sobreposicao_res85@data@values==3))/length(which(final_res0k@data@values==2))
+          sobreposicao_res85<-res_model0k+res_model85
+          resultados_spp[(j-1)*9+12,10,i]<-length(which(sobreposicao_res85@data@values==1))/length(which(res_model0k@data@values==2))
+          resultados_spp[(j-1)*9+12,11,i]<-length(which(sobreposicao_res85@data@values==2))/length(which(res_model0k@data@values==2))
+          resultados_spp[(j-1)*9+12,12,i]<-length(which(sobreposicao_res85@data@values==3))/length(which(res_model0k@data@values==2))
           
           #raster riqueza
-          Sraster_res85@layers[[j]]<-final_res85+Sraster_res85@layers[[j]]
-                    
-          #writeRaster(stack(final_res0k, final_res26, final_res85), paste("./mapas/", gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_res[j]), "_","res", sep=""),overwrite=TRUE)
-          rm(clima_residencia, residencia_rst2, data_new_res, map_res, res_model, adequab_res, final_res0k, validate_resid, res_model_point,
-             clima_26res, res_model26,final_res26, res_model26_point, clima_85res,  res_model85, final_res85, res_model85_point)
+          Sraster_res85@layers[[j]]<-(merge(res_model85, america_rst0))+Sraster_res85@layers[[j]]
           
-        }     
+          writeRaster(stack(res_model0k, res_model26, res_model85), paste("./mapas/", gsub(".shp", "", shapes[i]), "_",gsub(".grd", "", clima_res[j]), "_","res", sep=""),overwrite=TRUE)
+          rm(clima_residencia, residencia_rst2, res_model, validate_resid, res_model_point,
+             res_model26, res_model26_point, res_model85, res_model85_point)
+        }
       }
     }
     rm(recorte)
   }
+  
   Sraster_rep<-stack(Sraster_rep0k,Sraster_rep26, Sraster_rep85)
   names(Sraster_rep)<-paste(rep(c("CCSM","FGOALS", "GISS", "IPSL", "MIROC", "MRI" ), times=3), "_", rep(c("0k","26","85"), each=6), sep="")
-    
+  
   Sraster_inv<- stack(Sraster_inv0k, Sraster_inv26, Sraster_inv85)
   names(Sraster_inv)<-paste(rep(c("CCSM","FGOALS", "GISS", "IPSL", "MIROC", "MRI" ), times=3), "_", rep(c("0k","26","85"), each=6), sep="")
-    
+  
   Sraster_res<-stack(Sraster_res0k, Sraster_res26, Sraster_res85)
   names(Sraster_res)<-paste(rep(c("CCSM","FGOALS", "GISS", "IPSL", "MIROC", "MRI" ), times=3), "_", rep(c("0k","26","85"), each=6), sep="")
-
+  
   
   return(list(resultados_spp=resultados_spp, Sraster_rep=Sraster_rep, Sraster_inv=Sraster_inv, Sraster_res=Sraster_res))
+  
 }
