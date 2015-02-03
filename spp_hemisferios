@@ -1,0 +1,60 @@
+library(maptools)
+
+spp_hem <-matrix( nrow=77, ncol=3,dimnames=list(shapes, c("SEASONAL1", "SEASONAL2", "SEASONAL3")))
+
+for(i in 1: length(shapes)){
+  paxaro<- readShapePoly (shapes[1], delete_null_obj=TRUE)
+  residencia<-resident_birds(paxaro)
+  reproduccion<-breeding_birds(paxaro)
+  invernada<- nonbreeding_birds(paxaro)
+  
+  if(!is.null(residencia)){
+    if(sum(residencia@bbox[2,1:2]<0)==1){
+      spp_hem[i,1]<-"sul_norte"
+    }
+    if(sum(residencia@bbox[2,1:2]<0)==2){
+      spp_hem[i,1]<-"sul"
+    } 
+    if(sum(residencia@bbox[2,1:2]>0)==2){
+      spp_hem[i,1]<-"norte"
+    }
+  }
+  
+  if(!is.null(reproduccion)){
+    if(sum(reproduccion@bbox[2,1:2]<0)==1){
+      spp_hem[i,2]<-"sul_norte"
+    }
+    if(sum(reproduccion@bbox[2,1:2]<0)==2){
+      spp_hem[i,2]<-"sul"
+    } 
+    if(sum(reproduccion@bbox[2,1:2]>0)==2){
+      spp_hem[i,2]<-"norte"
+    }
+  }
+  
+  if(!is.null(invernada)){
+    if(sum(invernada@bbox[2,1:2]<0)==1){
+      spp_hem[i,3]<-"sul_norte"
+    }
+    if(sum(invernada@bbox[2,1:2]<0)==2){
+      spp_hem[i,3]<-"sul"
+    } 
+    if(sum(invernada@bbox[2,1:2]>0)==2){
+      spp_hem[i,3]<-"norte"
+    }
+  }
+  
+  print(shapes[i])
+}
+
+
+##listar spp de cada sistema migratorio
+#austral-neotropical
+aust_neot_obr<-rownames(spp_hem[is.na(spp_hem$SEASONAL1) & spp_hem$SEASONAL2=="sul",]) #nao possuem area de residencia, aust_neot_obr esta contido em aust_neot
+aust_neot_parc<-rownames(spp_hem[is.na(spp_hem$SEASONAL2),]) #nao possuem areas de reproducao
+aust_neot<-rownames(spp_hem[!is.na(spp_hem$SEASONAL2) & spp_hem$SEASONAL2=="sul",]) #apenas 3 possuem area de residencia
+
+#neartico-neotropical
+neart_neot_obr<-rownames(spp_hem[is.na(spp_hem$SEASONAL1) & spp_hem$SEASONAL2=="norte",]) #nao possuem area de residencia
+neart_neot_parc<-rownames(spp_hem[is.na(spp_hem$SEASONAL3) & spp_hem$SEASONAL2=="norte" ,]) #nao possuem area de invernada
+neart_neot<-rownames(spp_hem[!is.na(spp_hem$SEASONAL2) & spp_hem$SEASONAL2=="norte",]) #inclui todas as nearticas
