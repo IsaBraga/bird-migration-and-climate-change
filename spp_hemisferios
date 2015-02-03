@@ -46,15 +46,3 @@ for(i in 1: length(shapes)){
   
   print(shapes[i])
 }
-
-
-##listar spp de cada sistema migratorio
-#austral-neotropical
-aust_neot_obr<-rownames(spp_hem[is.na(spp_hem$SEASONAL1) & spp_hem$SEASONAL2=="sul",]) #nao possuem area de residencia, aust_neot_obr esta contido em aust_neot
-aust_neot_parc<-rownames(spp_hem[is.na(spp_hem$SEASONAL2),]) #nao possuem areas de reproducao
-aust_neot<-rownames(spp_hem[!is.na(spp_hem$SEASONAL2) & spp_hem$SEASONAL2=="sul",]) #apenas 3 possuem area de residencia
-
-#neartico-neotropical
-neart_neot_obr<-rownames(spp_hem[is.na(spp_hem$SEASONAL1) & spp_hem$SEASONAL2=="norte",]) #nao possuem area de residencia
-neart_neot_parc<-rownames(spp_hem[is.na(spp_hem$SEASONAL3) & spp_hem$SEASONAL2=="norte" ,]) #nao possuem area de invernada
-neart_neot<-rownames(spp_hem[!is.na(spp_hem$SEASONAL2) & spp_hem$SEASONAL2=="norte",]) #inclui todas as nearticas
