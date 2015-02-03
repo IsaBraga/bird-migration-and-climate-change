@@ -1,10 +1,10 @@
 breeding_birds<- function (shape_bird)
 {
-  if ((1%in%shape_bird$SEASONAL | 2%in%shape_bird$SEASONAL) & #####2BREEDING AND 1RESIDENT POLYGONS
+  if (( 2%in%shape_bird$SEASONAL) & #####2BREEDING 
         (1%in%shape_bird$ORIGIN| 2%in%shape_bird$ORIGIN) & #####1NATIVE AND 2REINTRODUCED POLYGONS
         any(shape_bird$PRESENCE!=5)){  #####5EXTINT POLYGONS
     
-    bird<-shape_bird[(shape_bird$SEASONAL==1 | shape_bird$SEASONAL==2) & #####2BREEDING AND 1RESIDENT POLYGONS
+    bird<-shape_bird[( shape_bird$SEASONAL==2) & #####2BREEDING POLYGONS
                        (shape_bird$ORIGIN==1 | shape_bird$ORIGIN==2) & #####1NATIVE AND 2REINTRODUCED POLYGONS
                        shape_bird$PRESENCE!=5,]
     return(bird)
@@ -15,11 +15,11 @@ breeding_birds<- function (shape_bird)
 
 nonbreeding_birds<- function (shape_bird)
 {
-  if ((1%in%shape_bird$SEASONAL | 3%in%shape_bird$SEASONAL) & #####2BREEDING AND 1RESIDENT POLYGONS
-        (1%in%shape_bird$ORIGIN| 2%in%shape_bird$ORIGIN) & #####1NATIVE AND 2REINTRODUCED POLYGONS
+  if ((3%in%shape_bird$SEASONAL) & #####3NONBREEDING POLYGONS
+        (1%in%shape_bird$ORIGIN| 2%in%shape_bird$ORIGIN) & #####1NATIVE POLYGONS
         any(shape_bird$PRESENCE!=5)){  #####5EXTINT POLYGONS
     
-    bird<-shape_bird[(shape_bird$SEASONAL==1 | shape_bird$SEASONAL==3) & #####2BREEDING AND 1RESIDENT POLYGONS
+    bird<-shape_bird[( shape_bird$SEASONAL==3) & #####3NONBREEDING POLYGONS
                        (shape_bird$ORIGIN==1 | shape_bird$ORIGIN==2) & #####1NATIVE AND 2REINTRODUCED POLYGONS
                        shape_bird$PRESENCE!=5,]
     return(bird)
@@ -27,5 +27,21 @@ nonbreeding_birds<- function (shape_bird)
     return(NULL)
   }
 }
+
+resident_birds<- function (shape_bird, delete_null_obj)
+{
+  if ((1%in%shape_bird$SEASONAL) & #####1RESIDENT POLYGONS
+        (1%in%shape_bird$ORIGIN| 2%in%shape_bird$ORIGIN) & #####1NATIVE POLYGONS
+        any(shape_bird$PRESENCE!=5)){  #####5EXTINT POLYGONS
+    
+    bird<-shape_bird[(shape_bird$SEASONAL==1 ) & ##### 1RESIDENT POLYGONS
+                       (shape_bird$ORIGIN==1 | shape_bird$ORIGIN==2) & #####1NATIVE AND 2REINTRODUCED POLYGONS
+                       shape_bird$PRESENCE!=5,]
+    return(bird)
+  }else{
+    return(NULL)
+  }
+}
+
 
 Sara Varela
