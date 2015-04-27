@@ -1,5 +1,6 @@
-#funcao inserida em optimise para definir o erro do modelo
-# *2
+##funcao inserida em optimise para definir o erro do modelo
+
+#para áreas de reprodução
 reclass_rep<-function(corte, obj_model, shape_rst, cortar_rep){
   obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar_rep)
   validate<-shape_rst+obj_model
@@ -11,10 +12,8 @@ reclass_rep<-function(corte, obj_model, shape_rst, cortar_rep){
   return(erro)
 }
 
-#funcao inserida em optimise para definir o erro do modelo
 
-
-
+#para áreas de invernada e residência
 reclass<-function(corte, obj_model, shape_rst, cortar){
   obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar)
   validate<-shape_rst+obj_model
@@ -22,36 +21,6 @@ reclass<-function(corte, obj_model, shape_rst, cortar){
   acerto <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
   sobrepredicao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
   erro <- (1-acerto)*2+sobrepredicao
-  
-  return(erro)
-}
-
-########
-
-#funcao inserida em optimise para definir o erro do modelo
-# *1.3
-reclass_rep<-function(corte, obj_model, shape_rst, cortar_rep){
-  obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar_rep)
-  validate<-shape_rst+obj_model
-  
-  acerto <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobrepredicao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-acerto)*1.3+sobrepredicao
-  
-  return(erro)
-}
-
-#funcao inserida em optimise para definir o erro do modelo
-
-
-
-reclass<-function(corte, obj_model, shape_rst, cortar){
-  obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar)
-  validate<-shape_rst+obj_model
-  
-  acerto <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobrepredicao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-acerto)*1.3+sobrepredicao
   
   return(erro)
 }
