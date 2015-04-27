@@ -2,7 +2,6 @@
 
 library(raster)
 
-setwd("D:/Ecologia/projeto_migracao_X_ mudancas_climaticas/clima_dados")
 ##CCSM##
 CCSM_0k_JJA_lista<-".*CCSM_0k.*JJA.*"
 CCSM_0k_JJA_lista<-dir(pattern=CCSM_0k_JJA_lista)
