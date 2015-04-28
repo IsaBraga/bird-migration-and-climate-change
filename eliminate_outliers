@@ -121,3 +121,6 @@ eliminate_outliers_res<- function (climate, distribution){
   }
   return (minmax)
 }
+
+
+Sara Varela
