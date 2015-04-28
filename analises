@@ -1,9 +1,11 @@
+____________________________________________
+  
+  SCRIP ANÁLISE DOS DADOS AVES MIGRATÓRIAS
+____________________________________________
+
 nomes_index4<-read.table("nomes_index4.txt", h=T) #para a indexaçao 
-
-
-spp_austrais<-read.csv("D:/tyrannidae_spp/tyrannideos_austrais.csv", h=T)
-spp_nearticos<-read.csv("D:/tyrannidae_spp/tyrannideos_nearticos.csv", h=T)
-
+spp_austrais<-read.csv("D:/tyrannidae_spp/tyrannideos_austrais.csv", h=T) #nomes das espécies austrais-neot
+spp_nearticos<-read.csv("D:/tyrannidae_spp/tyrannideos_nearticos.csv", h=T) #nomes das espécies neárticas-neot
 
 
 ###separar os melhores modelos (sensibilidade>0.7 e sobreprevisão<0.4)
@@ -44,11 +46,7 @@ _____________________________
 ##TAMANHO DAS ÁREAS##
 
 ##diferenças entre presente e futuro no tamanho das áreas de ocorrência
-nomes_index4<-read.table("nomes_index4.txt", h=T) #para a indexaçao 
-spp_austrais<-read.csv("D:/tyrannidae_spp/tyrannideos_austrais.csv", h=T) #nomes das espécies austrais-neot
-spp_nearticos<-read.csv("D:/tyrannidae_spp/tyrannideos_nearticos.csv", h=T) #nomes das espécies neárticas-neot
 
-###area (numero de celulas) 
 #invernada
 Area0k.inv7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",7,])[,-1]
 Area26.inv7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",7,])[,-1]
