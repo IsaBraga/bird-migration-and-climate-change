@@ -710,3 +710,5 @@ DistInvRes85_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|mo
 AICtab(DistInvRes85_periodo,DistInvRes85_nulo,DistInvRes85_periodoSistema,DistInvRes85_sist,DistInvRes85_interacao) 
 
 
+
+Maraísa Braga
