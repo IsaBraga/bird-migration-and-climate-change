@@ -1,4 +1,4 @@
-#eliminar outliers dos ranges de invernada e reprodução
+#eliminar outliers das áreas de invernada e reprodução
 eliminate_outliers<- function (climate, distribution){
   # nicho climatico
   nicho<- extract (stack(climate[[c(1:23)]]),distribution, na.rm=TRUE)
@@ -64,7 +64,7 @@ eliminate_outliers<- function (climate, distribution){
 }
 
 
-#eliminar outliers dos ranges de residência
+#eliminar outliers das áreas de residência
 eliminate_outliers_res<- function (climate, distribution){
   # nicho climatico
   nicho<- extract (stack(climate[[c(1:19)]]),distribution, na.rm=TRUE)
