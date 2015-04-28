@@ -44,4 +44,4 @@ resident_birds<- function (shape_bird, delete_null_obj)
 }
 
 
-Sara Varela
+adaptado de Sara Varela
