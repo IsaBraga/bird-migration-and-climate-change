@@ -1,13 +1,13 @@
-##funcao inserida em optimise para definir o erro do modelo
+##funcao inserida em optimise para otimizar o corte da adequabilidade (menor erro para o modelo de cada espécie)
 
 #para áreas de reprodução
 reclass_rep<-function(corte, obj_model, shape_rst, cortar_rep){
   obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar_rep)
   validate<-shape_rst+obj_model
   
-  acerto <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobrepredicao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-acerto)*2+sobrepredicao
+  sensibilidade <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
+  sobreprevisao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
+  erro <- (1-sensibilidade)*2+sobreprevisao
   
   return(erro)
 }
@@ -18,9 +18,9 @@ reclass<-function(corte, obj_model, shape_rst, cortar){
   obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar)
   validate<-shape_rst+obj_model
   
-  acerto <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobrepredicao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-acerto)*2+sobrepredicao
+  sensibilidade <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
+  sobreprevisao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
+  erro <- (1-sensibilidade)*2+sobreprevisao
   
   return(erro)
 }
