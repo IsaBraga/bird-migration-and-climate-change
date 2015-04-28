@@ -64,3 +64,6 @@ for (i in 1:length(temp_media)){
   
   rm(temp_media_DJF, temp_media_JJA, ler_temp)
 }
+
+
+Maraísa Braga
