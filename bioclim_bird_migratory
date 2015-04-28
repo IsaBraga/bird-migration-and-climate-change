@@ -465,3 +465,6 @@ run_Bioclim_model<-function(shapes, clima_JJA, clima_DJF, clima_anual){
   return(list(resultados_spp=resultados_spp, Sraster_rep=Sraster_rep, Sraster_inv=Sraster_inv, Sraster_res=Sraster_res))
   
 }
+
+
+Maraísa Braga
