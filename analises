@@ -1,1 +1,714 @@
-asd
+nomes_index4<-read.table("nomes_index4.txt", h=T) #para a indexaçao 
+
+
+spp_austrais<-read.csv("D:/tyrannidae_spp/tyrannideos_austrais.csv", h=T)
+spp_nearticos<-read.csv("D:/tyrannidae_spp/tyrannideos_nearticos.csv", h=T)
+
+
+
+###separar os melhores modelos (sensibilidade>0.7 e sobreprevisão<0.4)
+spp_goodModels7<-matrix(nrow=78, ncol=18)
+colnames(spp_goodModels7)<-paste(rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC", "MRI"), each=3, times=1),
+                                 rep(c("REP","INV","RES"), each=1, times=6), sep="_")
+rownames(spp_goodModels7)<-dimnames(aves_migratorias_model7)[[3]]
+
+
+spp_goodModels7[,c(1,4,7,10,13,16)] <- t(aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",8,][-1,] >0.7 & 
+  aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",9,][-1,]<0.4)
+spp_goodModels7[,c(2,5,8,11,14,17)] <- t(aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",8,][-1,]>0.7 & 
+  aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",9,][-1,]<0.4)
+spp_goodModels7[,c(3,6,9,12,15,18)] <- t(aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",8,][-1,]>0.7 & 
+  aves_migratorias_model7[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",9,][-1,]<0.4)
+
+spp_goodModels7<-as.data.frame(spp_goodModels7)
+
+sum(spp_goodModels7==1, na.rm=T) #numero de modelos bons = 409
+sum(!is.na(spp_goodModels7)) #numero original de modelos gerados = 1026
+
+
+#tranformar o array 'aves_migratorias_model7' restando apenas os resultados dos melhores modelos
+aves_migratorias_model7bons<-aves_migratorias_model7
+for(i in 1:ncol(spp_goodModels7)){
+  for(j in 1:nrow(spp_goodModels7)){
+    if(spp_goodModels7[j,i]==0 & !is.na(spp_goodModels7[j,i])){
+      aves_migratorias_model7bons[(3*i+1):(3*i+3),,j]<-NA
+    }    
+  }  
+}
+
+_____________________________
+
+      ##Análises##
+_____________________________
+
+##TAMANHO DAS ÁREAS##
+
+##diferenças entre presente e futuro no tamanho das áreas de ocorrência
+nomes_index4<-read.table("nomes_index4.txt", h=T) #para a indexaçao 
+spp_austrais<-read.csv("D:/tyrannidae_spp/tyrannideos_austrais.csv", h=T) #nomes das espécies austrais-neot
+spp_nearticos<-read.csv("D:/tyrannidae_spp/tyrannideos_nearticos.csv", h=T) #nomes das espécies neárticas-neot
+
+###area (numero de celulas) 
+#invernada
+Area0k.inv7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="INV",7,])[,-1]
+Area26.inv7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="26" & nomes_index4$fase=="INV",7,])[,-1]
+Area85.inv7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="85" & nomes_index4$fase=="INV",7,])[,-1]
+
+#reproducao
+Area0k.rep7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="REP",7,])[,-1]
+Area26.rep7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="26" & nomes_index4$fase=="REP",7,])[,-1]
+Area85.rep7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="85" & nomes_index4$fase=="REP",7,])[,-1]
+
+#residencia
+Area0k.res7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="0k" & nomes_index4$fase=="RES",7,])[,-1]
+Area26.res7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="26" & nomes_index4$fase=="RES",7,])[,-1]
+Area85.res7 <- t(aves_migratorias_model7bons[nomes_index4$epoca=="85" & nomes_index4$fase=="RES",7,])[,-1]
+
+
+##Modelo Misto
+#INVERNADA#
+#RCP26
+areaInv26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "26"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area26.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+
+areaInv26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "26"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area26.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+areaInv26_lmer<-rbind(areaInv26_lmerS,areaInv26_lmerN)
+
+#modelo misto
+Inv26_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaInv26_lmer,REML=F)
+Inv26_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaInv26_lmer,REML=F)
+Inv26_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaInv26_lmer,REML=F)
+Inv26_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaInv26_lmer,REML=F)
+Inv26_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaInv26_lmer,REML=F)
+
+AICtab(Inv26_lmermodtempo,Inv26_lmermodnulo,Inv26_lmermodtemposist,Inv26_lmermodsist,Inv26_lmermodinteracao) 
+
+
+#RCP85
+areaInv85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "85"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area85.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+areaInv85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "85"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area85.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+areaInv85_lmer<-rbind(areaInv85_lmerS,areaInv85_lmerN)
+
+#modelo misto
+Inv85_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaInv85_lmer,REML=F)
+Inv85_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaInv85_lmer,,REML=F)
+Inv85_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaInv85_lmer,REML=F)
+Inv85_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaInv85_lmer,REML=F)
+Inv85_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaInv85_lmer,REML=F)
+
+AICtab(Inv85_lmermodtempo,Inv85_lmermodnulo,Inv85_lmermodtemposist,Inv85_lmermodsist,Inv85_lmermodinteracao)
+
+
+
+#REPRODUCAO
+#RCP26
+areaRep26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "26"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.inv7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area26.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+areaRep26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "26"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area26.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+areaRep26_lmer<-rbind(areaRep26_lmerS,areaRep26_lmerN)
+
+#modelo misto
+Rep26_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaRep26_lmer,REML=F)
+Rep26_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaRep26_lmer,REML=F)
+Rep26_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaRep26_lmer,REML=F)
+Rep26_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaRep26_lmer,REML=F)
+Rep26_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaRep26_lmer,REML=F)
+
+AICtab(Rep26_lmermodtempo,Rep26_lmermodnulo,Rep26_lmermodtemposist,Rep26_lmermodsist,Rep26_lmermodinteracao) 
+
+
+#RCP85
+areaRep85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "85"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.inv7[dimnames(Area0k.rep7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area85.rep7[dimnames(Area85.rep7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+areaRep85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "85"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.rep7[dimnames(Area0k.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area85.rep7[dimnames(Area85.rep7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+areaRep85_lmer<-rbind(areaRep85_lmerS,areaRep85_lmerN)
+
+#modelo misto
+Rep85_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaRep85_lmer,REML=F)
+Rep85_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaRep85_lmer,REML=F)
+Rep85_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaRep85_lmer,REML=F)
+Rep85_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaRep85_lmer,REML=F)
+Rep85_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaRep85_lmer,REML=F)
+
+AICtab(Rep85_lmermodtempo,Rep85_lmermodnulo,Rep85_lmermodtemposist,Rep85_lmermodsist,Rep85_lmermodinteracao) 
+
+
+# RESIDENCIA##
+#RCP26
+areaRes26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "26"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area26.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+areaRes26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "26"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area26.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+areaRes26_lmer<-rbind(areaRes26_lmerS,areaRes26_lmerN)
+
+#modelo misto
+Res26_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaRes26_lmer,REML=F)
+Res26_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaRes26_lmer,REML=F)
+Res26_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaRes26_lmer,REML=F)
+Res26_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaRes26_lmer,REML=F)
+Res26_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaRes26_lmer,REML=F)
+
+AICtab(Res26_lmermodtempo,Res26_lmermodnulo,Res26_lmermodtemposist,Res26_lmermodsist,Res26_lmermodinteracao) 
+
+
+#RCP85
+areaRes85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                            epoca= rep(c("0k", "85"), each=204) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34,times=2),
+                            especie=rep(rownames(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12),
+                            area=c(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,],
+                                   Area85.res7[dimnames(Area0k.res7)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+areaRes85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                            epoca= rep(c("0k", "85"), each=264) , 
+                            modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44,times=2),
+                            especie=rep(rownames(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12),
+                            area=c(Area0k.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,],
+                                   Area85.res7[dimnames(Area0k.res7)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+
+areaRes85_lmer<-rbind(areaRes85_lmerS, areaRes85_lmerN)
+
+
+#modelo misto
+Res85_lmermodtempo<-lmer(area ~ epoca + (1|especie) + (1|modelo), data=areaRes85_lmer,REML=F)
+Res85_lmermodnulo<-lmer(area ~ 1 + (1|especie)+ (1|modelo), data=areaRes85_lmer,REML=F)
+Res85_lmermodtemposist<-lmer(area ~ epoca + sistema + (1|especie) + (1|modelo), data=areaRes85_lmer,REML=F)
+Res85_lmermodsist<-lmer(area ~ sistema + (1|especie) + (1|modelo), data=areaRes85_lmer,REML=F)
+Res85_lmermodinteracao<-lmer(area ~ epoca * sistema + (1|especie) + (1|modelo), data=areaRes85_lmer,REML=F)
+
+AICtab(Res85_lmermodtempo,Res85_lmermodnulo,Res85_lmermodtemposist,Res85_lmermodsist,Res85_lmermodinteracao) 
+
+
+
+
+
+##DIREÇÃO DE MUDANÇA DOS CENTROIDES##
+
+midInv_0k<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midInv_26<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="26",5:6,][-1,,]
+midInv_85<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRep_0k<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRep_26<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRep_85<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRes_0k<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRes_26<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRes_85<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+library(rgeos)
+library(maptools)
+
+##calcular o azimute
+
+#entre areas de invernada presente e futuro
+Desloc_centInv_0k26<-matrix(nrow=dim(centInv_lat0k)[1], ncol=dim(centInv_lat0k)[2],dimnames=list(dimnames(centInv_lat0k)[[1]],dimnames(centInv_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centInv_0k26)){
+  for(j in 1: ncol(Desloc_centInv_0k26)){
+    Desloc_centInv_0k26[i,j]<-gzAzimuth(from=midInv_0k[j,,i],to=midInv_26[j,,i])
+  }
+}
+Desloc_centInv_0k85<-matrix(nrow=dim(centInv_lat0k)[1], ncol=dim(centInv_lat0k)[2],dimnames=list(dimnames(centInv_lat0k)[[1]],dimnames(centInv_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centInv_0k85)){
+  for(j in 1: ncol(Desloc_centInv_0k85)){
+    Desloc_centInv_0k85[i,j]<-gzAzimuth(from=midInv_0k[j,,i],to=midInv_85[j,,i])
+  }
+}
+
+
+#entre areas de reproducao presente e futuro
+Desloc_centRep_0k26<-matrix(nrow=dim(centRep_lat0k)[1], ncol=dim(centRep_lat0k)[2],dimnames=list(dimnames(centRep_lat0k)[[1]],dimnames(centRep_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centRep_0k26)){
+  for(j in 1: ncol(Desloc_centRep_0k26)){
+    Desloc_centRep_0k26[i,j]<-gzAzimuth(from=midRep_0k[j,,i],to=midRep_26[j,,i])
+  }
+}
+Desloc_centRep_0k85<-matrix(nrow=dim(centRep_lat0k)[1], ncol=dim(centRep_lat0k)[2],dimnames=list(dimnames(centRep_lat0k)[[1]],dimnames(centRep_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centRep_0k85)){
+  for(j in 1: ncol(Desloc_centRep_0k85)){
+    Desloc_centRep_0k85[i,j]<-gzAzimuth(from=midRep_0k[j,,i],to=midRep_85[j,,i])
+  }
+}
+
+
+#entre areas de residencia presente e futuro
+Desloc_centRes_0k26<-matrix(nrow=dim(centRes_lat0k)[1], ncol=dim(centRes_lat0k)[2],dimnames=list(dimnames(centRes_lat0k)[[1]],dimnames(centRes_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centRes_0k26)){
+  for(j in 1: ncol(Desloc_centRes_0k26)){
+    Desloc_centRes_0k26[i,j]<-gzAzimuth(from=midRes_0k[j,,i],to=midRes_26[j,,i])
+  }
+}
+Desloc_centRes_0k85<-matrix(nrow=dim(centRes_lat0k)[1], ncol=dim(centRes_lat0k)[2],dimnames=list(dimnames(centRes_lat0k)[[1]],dimnames(centRes_lat0k)[[2]]))
+for(i in 1:nrow(Desloc_centRes_0k85)){
+  for(j in 1: ncol(Desloc_centRes_0k85)){
+    Desloc_centRes_0k85[i,j]<-gzAzimuth(from=midRes_0k[j,,i],to=midRes_85[j,,i])
+  }
+}
+
+
+
+###modelo circular
+library(circular)
+
+#tornar os dados circulares e separar entre spp austrais-neot e neárticas-neot
+Desloc_centInv_0k26<-as.circular(Desloc_centInv_0k26,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centInv_0k26CircN<-Desloc_centInv_0k26[dimnames(Desloc_centInv_0k26)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centInv_0k26CircS<-Desloc_centInv_0k26[dimnames(Desloc_centInv_0k26)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+
+Desloc_centInv_0k85<-as.circular(Desloc_centInv_0k85,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centInv_0k85CircN<-Desloc_centInv_0k85[dimnames(Desloc_centInv_0k85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centInv_0k85CircS<-Desloc_centInv_0k85[dimnames(Desloc_centInv_0k85)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+Desloc_centRep_0k26<-as.circular(Desloc_centRep_0k26,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centRep_0k26CircN<-Desloc_centRep_0k26[dimnames(Desloc_centRep_0k26)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centRep_0k26CircS<-Desloc_centRep_0k26[dimnames(Desloc_centRep_0k26)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+Desloc_centRep_0k85<-as.circular(Desloc_centRep_0k85,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centRep_0k85CircN<-Desloc_centRep_0k85[dimnames(Desloc_centRep_0k85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centRep_0k85CircS<-Desloc_centRep_0k85[dimnames(Desloc_centRep_0k85)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+Desloc_centRes_0k26<-as.circular(Desloc_centRes_0k26,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centRes_0k26CircN<-Desloc_centRes_0k26[dimnames(Desloc_centRes_0k26)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centRes_0k26CircS<-Desloc_centRes_0k26[dimnames(Desloc_centRes_0k26)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+Desloc_centRes_0k85<-as.circular(Desloc_centRes_0k85,type=c("angles"),units=c("degrees"),template=c("none"),zero=1.5708,rotation=c("clock"))
+Desloc_centRes_0k85CircN<-Desloc_centRes_0k85[dimnames(Desloc_centRes_0k85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]
+Desloc_centRes_0k85CircS<-Desloc_centRes_0k85[dimnames(Desloc_centRes_0k85)[[1]] %in% spp_austrais$austrais.neotropicais,]
+
+
+#teste de uniformidade de Rayleigh
+
+angulos_85<-rbind(cbind(rbind(rayleigh.test(Desloc_centInv_0k85CircS[,1])$p.value, mean.circular(Desloc_centInv_0k85CircS[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircS[,2])$p.value, mean.circular(Desloc_centInv_0k85CircS[,2],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircS[,3])$p.value, mean.circular(Desloc_centInv_0k85CircS[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircS[,4])$p.value, mean.circular(Desloc_centInv_0k85CircS[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircS[,5])$p.value, mean.circular(Desloc_centInv_0k85CircS[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircS[,6])$p.value, mean.circular(Desloc_centInv_0k85CircS[,6],na.rm=T)[[1]])),
+                   cbind(rbind(rayleigh.test(Desloc_centRep_0k85CircS[,1])$p.value, mean.circular(Desloc_centRep_0k85CircS[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircS[,2])$p.value, mean.circular(Desloc_centRep_0k85CircS[,2],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircS[,3])$p.value, mean.circular(Desloc_centRep_0k85CircS[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircS[,4])$p.value, mean.circular(Desloc_centRep_0k85CircS[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircS[,5])$p.value, mean.circular(Desloc_centRep_0k85CircS[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircS[,6])$p.value, mean.circular(Desloc_centRep_0k85CircS[,6],na.rm=T)[[1]])),
+                   cbind(rbind(rayleigh.test(Desloc_centRes_0k85CircS[,1])$p.value, mean.circular(Desloc_centRes_0k85CircS[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircS[,2])$p.value, mean.circular(Desloc_centRes_0k85CircS[,2],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircS[,3])$p.value, mean.circular(Desloc_centRes_0k85CircS[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircS[,4])$p.value, mean.circular(Desloc_centRes_0k85CircS[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircS[,5])$p.value, mean.circular(Desloc_centRes_0k85CircS[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircS[,6])$p.value, mean.circular(Desloc_centRes_0k85CircS[,6],na.rm=T)[[1]])),
+                   cbind(rbind(rayleigh.test(Desloc_centInv_0k85CircN[,1])$p.value, mean.circular(Desloc_centInv_0k85CircN[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircN[,2])$p.value, mean.circular(Desloc_centInv_0k85CircN[,2],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircN[,3])$p.value, mean.circular(Desloc_centInv_0k85CircN[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircN[,4])$p.value, mean.circular(Desloc_centInv_0k85CircN[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircN[,5])$p.value, mean.circular(Desloc_centInv_0k85CircN[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centInv_0k85CircN[,6])$p.value, mean.circular(Desloc_centInv_0k85CircN[,6],na.rm=T)[[1]])),
+                   cbind(rbind(rayleigh.test(Desloc_centRep_0k85CircN[,1])$p.value, mean.circular(Desloc_centRep_0k85CircN[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircN[,1])$p.value, mean.circular(Desloc_centRep_0k85CircN[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircN[,3])$p.value, mean.circular(Desloc_centRep_0k85CircN[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircN[,4])$p.value, mean.circular(Desloc_centRep_0k85CircN[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircN[,5])$p.value, mean.circular(Desloc_centRep_0k85CircN[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRep_0k85CircN[,6])$p.value, mean.circular(Desloc_centRep_0k85CircN[,6],na.rm=T)[[1]])),
+                   cbind(rbind(rayleigh.test(Desloc_centRes_0k85CircN[,1])$p.value, mean.circular(Desloc_centRes_0k85CircN[,1],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircN[,2])$p.value, mean.circular(Desloc_centRes_0k85CircN[,2],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircN[,3])$p.value, mean.circular(Desloc_centRes_0k85CircN[,3],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircN[,4])$p.value, mean.circular(Desloc_centRes_0k85CircN[,4],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircN[,5])$p.value, mean.circular(Desloc_centRes_0k85CircN[,5],na.rm=T)[[1]]),
+                         rbind(rayleigh.test(Desloc_centRes_0k85CircN[,6])$p.value, mean.circular(Desloc_centRes_0k85CircN[,6],na.rm=T)[[1]])))
+
+
+#transformar angulos negativos em positivos
+angulos_85<-ifelse(angulos_85<0,360+angulos_85,angulos_85) 
+  colnames(angulos_85)<-c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI")
+  rownames(angulos_85)<-rep(c("inv_aust",  "rep_aust", "res_aust", "inv_neart","rep_neart","res_neart"), each=2)
+
+#correcao de bonferroni
+0.05/6 #valor critico=0.008333333
+angulos_85<0.008333333
+
+
+
+#distancias entre os centroides no presente e no futuru para as mesmas áreas
+
+#calculo das distancias utilizando a funcao distVincentyEllipsoid
+library(geosphere )
+DistInv0k_26 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInv0k_26)){
+  DistInv0k_26[i,] <- distVincentyEllipsoid(p1=midInv_0k[,,i], p2=midInv_26[,,i])/1000
+}
+DistInv0k_85 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInv0k_85)){
+  DistInv0k_85[i,] <- distVincentyEllipsoid(p1=midInv_0k[,,i], p2=midInv_85[,,i])/1000
+}
+#
+DistRep0k_26 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistRep0k_26)){
+  DistRep0k_26[i,] <- distVincentyEllipsoid(p1=midRep_0k[,,i], p2=midRep_26[,,i])/1000
+}
+DistRep0k_85 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistRep0k_85)){
+  DistRep0k_85[i,] <- distVincentyEllipsoid(p1=midRep_0k[,,i], p2=midRep_85[,,i])/1000
+}
+#
+DistRes0k_26 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistRes0k_26)){
+  DistRes0k_26[i,] <- distVincentyEllipsoid(p1=midRes_0k[,,i], p2=midRes_26[,,i])/1000
+}
+DistRes0k_85 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistRes0k_85)){
+  DistRes0k_85[i,] <- distVincentyEllipsoid(p1=midRes_0k[,,i], p2=midRes_85[,,i])/1000
+}
+
+
+#separar entre spp austrais-neot e nearticas-neot
+DistInv0k_26S <-DistInv0k_26[dimnames(DistInv0k_26)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistInv0k_85S <-DistInv0k_85[dimnames(midInv_0k)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistInv0k_26N <-DistInv0k_26[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+DistInv0k_85N <-DistInv0k_85[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+#
+DistRep0k_26S <- DistRep0k_26[dimnames(midInv_0k)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistRep0k_85S <- DistRep0k_85[dimnames(midInv_0k)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistRep0k_26N <- DistRep0k_26[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+DistRep0k_85N <- DistRep0k_85[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+#
+DistRes0k_26S <- DistRes0k_26[dimnames(midInv_0k)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistRes0k_85S <- DistRes0k_85[dimnames(midInv_0k)[[3]] %in% spp_austrais$austrais.neotropicais,]
+DistRes0k_26N <- DistRes0k_26[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+DistRes0k_85N <- DistRes0k_85[dimnames(midInv_0k)[[3]] %in% spp_nearticos$nearticos.neotropicais,]
+
+
+#boxplot
+
+boxplot(c(DistInv0k_85N, DistInv0k_85S)~c(rep("Neártico-Neot", each=192), rep("Austral-Neot", each=276)), 
+         ylim=c(0,8500),par(bty="l", cex=1.3, pch=20))
+axis(at=c(1000, 3000, 5000, 7000), side=2)
+mtext("Áreas de invernada",side=1.5, cex=1.8,line=3)
+mtext("Deslocamento dos centroides (km)",side=2, cex=1.5,line=2.8)
+
+
+boxplot(c(DistRep0k_85N, DistRep0k_85S)~c(rep("Neártico-Neot", each=192), rep("Austral-Neot", each=276)),
+        ylim=c(0,8500),par(bty="l", cex=1.3, pch=20))
+axis(at=c(1000, 3000, 5000, 7000), side=2)
+mtext("Áreas de reprodução",side=1.5, cex=1.8,line=3)
+
+
+boxplot(c(DistRes0k_85N, DistRes0k_85S)~c(rep("Neártico-Neot", each=192), rep("Austral-Neot", each=276)), 
+        ylim=c(0,8500), par(bty="l", cex=1.3, pch=20))
+axis(at=c(1000, 3000, 5000, 7000), side=2)
+mtext("Áreas de residência",side=1.5, cex=1.8,line=3)
+
+
+
+#distancias entre os centroides presente e futuru para as mesmas áreas
+library(geosphere)
+library("bbmle", lib.loc="~/R/win-library/3.1")
+
+
+midInv_0k<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midInv_26<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="26",5:6,][-1,,]
+midInv_85<-aves_migratorias_model7bons[nomes_index4$fase=="INV" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRep_0k<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRep_26<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRep_85<-aves_migratorias_model7bons[nomes_index4$fase=="REP" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+midRes_0k<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="0k",5:6,][-1,,]
+midRes_26<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="26",5:6,][-1,,]
+midRes_85<-aves_migratorias_model7bons[nomes_index4$fase=="RES" & nomes_index4$epoca=="85",5:6,][-1,,]
+
+
+
+##DISTÂNCIAS DE MIGRAÇÃO##
+
+library(geosphere)
+
+#distancias ente reproducao e invernada
+DistInvRep0k <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRep0k)){
+  DistInvRep0k[i,] <- distVincentyEllipsoid(p1=midInv_0k[,,i], p2=midRep_0k[,,i])/1000
+} 
+
+DistInvRep26 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRep26)){
+  DistInvRep26[i,] <- distVincentyEllipsoid(p1=midInv_26[,,i], p2=midRep_26[,,i])/1000
+}
+
+DistInvRep85 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRep85)){
+  DistInvRep85[i,] <- distVincentyEllipsoid(p1=midInv_85[,,i], p2=midRep_85[,,i])/1000
+}
+
+
+#distancia de migracao entre invernada e residencia
+DistInvRes0k <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRes0k)){
+  DistInvRes0k[i,] <- distVincentyEllipsoid(p1=midInv_0k[,,i], p2=midRes_0k[,,i])/1000
+} 
+
+DistInvRes26 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRes26)){
+  DistInvRes26[i,] <- distVincentyEllipsoid(p1=midInv_26[,,i], p2=midRes_26[,,i])/1000
+}
+
+DistInvRes85 <- matrix(nrow=dim(midInv_0k)[3], ncol=dim(midInv_0k)[1],dimnames=list(dimnames(midInv_0k)[[3]],dimnames(midInv_0k)[[1]]))
+for(i in 1:nrow(DistInvRes85)){
+  DistInvRes85[i,] <- distVincentyEllipsoid(p1=midInv_85[,,i], p2=midRes_85[,,i])/1000
+}
+
+
+#distancia de migracao entre reproducao e residencia
+DistRepRes0k <- matrix(nrow=dim(midRep_0k)[3], ncol=dim(midRep_0k)[1],dimnames=list(dimnames(midRep_0k)[[3]],dimnames(midRep_0k)[[1]]))
+for(i in 1:nrow(DistRepRes0k)){
+  DistRepRes0k[i,] <- distVincentyEllipsoid(p1=midRep_0k[,,i], p2=midRes_0k[,,i])/1000
+} 
+
+DistRepRes26 <- matrix(nrow=dim(midRep_0k)[3], ncol=dim(midRep_0k)[1],dimnames=list(dimnames(midRep_0k)[[3]],dimnames(midRep_0k)[[1]]))
+for(i in 1:nrow(DistRepRes26)){
+  DistRepRes26[i,] <- distVincentyEllipsoid(p1=midRep_26[,,i], p2=midRes_26[,,i])/1000
+}
+
+DistRepRes85 <- matrix(nrow=dim(midRep_0k)[3], ncol=dim(midRep_0k)[1],dimnames=list(dimnames(midRep_0k)[[3]],dimnames(midRep_0k)[[1]]))
+for(i in 1:nrow(DistRepRes85)){
+  DistRepRes85[i,] <- distVincentyEllipsoid(p1=midRep_85[,,i], p2=midRes_85[,,i])/1000
+}
+
+
+
+##testar se as distancias de migracao mudaram do presente para o futuro
+library(lme4)
+library("bbmle", lib.loc="~/R/win-library/3.1")
+
+
+#REPRODUCAO - INVERNADA
+#RCP26
+DistInvRep26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "26"),  each=204), 
+                               especie=rep(rownames(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistInvRep26[dimnames(DistInvRep0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistInvRep26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "26"),  each=264), 
+                               especie=rep(rownames(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistInvRep26[dimnames(DistInvRep26)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+
+
+
+DistInvRep26_lmer<-rbind(DistInvRep26_lmerS,DistInvRep26_lmerN)
+
+
+#modelo misto
+DistInvRep26_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistInvRep26_lmer,REML=F)
+DistInvRep26_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistInvRep26_lmer,REML=F)
+DistInvRep26_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistInvRep26_lmer,REML=F)
+DistInvRep26_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistInvRep26_lmer,REML=F)
+DistInvRep26_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistInvRep26_lmer,REML=F)
+
+AICtab(DistInvRep26_periodo,DistInvRep26_nulo,DistInvRep26_periodoSistema,DistInvRep26_sist,DistInvRep26_interacao) 
+
+
+#RCP85
+DistInvRep85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "85"),  each=204), 
+                               especie=rep(rownames(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistInvRep85[dimnames(DistInvRep85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistInvRep85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "85"),  each=264), 
+                               especie=rep(rownames(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistInvRep0k[dimnames(DistInvRep0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistInvRep85[dimnames(DistInvRep85)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+DistInvRep85_lmer<-rbind(DistInvRep85_lmerS,DistInvRep85_lmerN)
+
+#modelo misto
+DistInvRep85_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistInvRep85_lmer,REML=F)
+DistInvRep85_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistInvRep85_lmer,REML=F)
+DistInvRep85_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistInvRep85_lmer,REML=F)
+DistInvRep85_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistInvRep85_lmer,REML=F)
+DistInvRep85_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistInvRep85_lmer,REML=F)
+
+AICtab(DistInvRep85_periodo,DistInvRep85_nulo,DistInvRep85_periodoSistema,DistInvRep85_sist,DistInvRep85_interacao) 
+
+
+
+#REPRODUCAO - RESIDENCIA
+library(lme4)
+library("bbmle", lib.loc="~/R/win-library/3.1")
+#RCP26 
+DistRepRes26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "26"),  each=204), 
+                               especie=rep(rownames(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistRepRes26[dimnames(DistRepRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistRepRes26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "26"),  each=264), 
+                               especie=rep(rownames(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistRepRes85[dimnames(DistRepRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+DistRepRes26_lmer<-rbind(DistRepRes26_lmerS,DistRepRes26_lmerN)
+
+
+#modelo misto
+DistRepRes26_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistRepRes26_lmer,REML=F)
+DistRepRes26_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistRepRes26_lmer,REML=F)
+DistRepRes26_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistRepRes26_lmer,REML=F)
+DistRepRes26_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistRepRes26_lmer,REML=F)
+DistRepRes26_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistRepRes26_lmer,REML=F)
+
+AICtab(DistRepRes26_periodo,DistRepRes26_nulo,DistRepRes26_periodoSistema,DistRepRes26_sist,DistRepRes26_interacao) 
+
+
+#RCP85
+DistRepRes85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "85"),  each=204), 
+                               especie=rep(rownames(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistRepRes85[dimnames(DistRepRes85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistRepRes85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "85"),  each=264), 
+                               especie=rep(rownames(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistRepRes0k[dimnames(DistRepRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistRepRes85[dimnames(DistRepRes85)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+DistRepRes85_lmer<-rbind(DistRepRes85_lmerS,DistRepRes85_lmerN)
+
+
+DistRepRes85_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistRepRes85_lmer,REML=F)
+DistRepRes85_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistRepRes85_lmer,REML=F)
+DistRepRes85_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistRepRes85_lmer,REML=F)
+DistRepRes85_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistRepRes85_lmer,REML=F)
+DistRepRes85_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistRepRes85_lmer,REML=F)
+
+AICtab(DistRepRes85_periodo,DistRepRes85_nulo,DistRepRes85_periodoSistema,DistRepRes85_sist,DistRepRes85_interacao) 
+
+
+#INVERNADA - RESIDENCIA
+library(lme4)
+library("bbmle", lib.loc="~/R/win-library/3.1")
+#RCP26
+DistInvRes26_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "26"),  each=204), 
+                               especie=rep(rownames(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistInvRes26[dimnames(DistInvRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistInvRes26_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "26"),  each=264), 
+                               especie=rep(rownames(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistInvRes26[dimnames(DistInvRes85)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+DistInvRes26_lmer<-rbind(DistInvRes26_lmerS,DistInvRes26_lmerN)
+
+
+#modelo misto
+DistInvRes26_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistInvRes26_lmer,REML=F)
+DistInvRes26_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistInvRes26_lmer,REML=F)
+DistInvRes26_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistInvRes26_lmer,REML=F)
+DistInvRes26_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistInvRes26_lmer,REML=F)
+DistInvRes26_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistInvRes26_lmer,REML=F)
+
+AICtab(DistInvRes26_periodo,DistInvRes26_nulo,DistInvRes26_periodoSistema,DistInvRes26_sist,DistInvRes26_interacao) 
+
+
+#RCP85
+DistInvRes85_lmerN<-data.frame(sistema=rep("neart_neot", each=408),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=34, times=2),
+                               periodo=rep(c("0k", "85"),  each=204), 
+                               especie=rep(rownames(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,]),times=12), 
+                               distancia=c(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_nearticos$nearticos.neotropicais,], 
+                                           DistInvRes85[dimnames(DistInvRes85)[[1]] %in% spp_nearticos$nearticos.neotropicais,]))
+
+DistInvRes85_lmerS<-data.frame(sistema=rep("aust_neot", each=528),
+                               modelo=rep(c("CCSM", "FGOALS", "GISS", "IPSL", "MIROC","MRI"), each=44, times=2),
+                               periodo=rep(c("0k", "85"),  each=264), 
+                               especie=rep(rownames(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,]),times=12), 
+                               distancia=c(DistInvRes0k[dimnames(DistInvRes0k)[[1]] %in% spp_austrais$austrais.neotropicais,], 
+                                           DistInvRes85[dimnames(DistInvRes85)[[1]] %in% spp_austrais$austrais.neotropicais,]))
+
+DistInvRes85_lmer<-rbind(DistInvRes85_lmerS,DistInvRes85_lmerN)
+
+
+#modelo misto
+DistInvRes85_periodo<-lmer(distancia ~ periodo + (1|especie) + (1|modelo),data=DistInvRes85_lmer,REML=F)
+DistInvRes85_nulo<-lmer(distancia ~ 1 + (1|especie) + (1|modelo),data=DistInvRes85_lmer,REML=F)
+DistInvRes85_periodoSistema<-lmer(distancia ~ periodo + sistema + (1|especie) + (1|modelo),data=DistInvRes85_lmer,REML=F)
+DistInvRes85_sist<-lmer(distancia ~ sistema + (1|especie) + (1|modelo),data=DistInvRes85_lmer,REML=F)
+DistInvRes85_interacao<-lmer(distancia ~ periodo * sistema + (1|especie) + (1|modelo),data=DistInvRes85_lmer,REML=F)
+
+AICtab(DistInvRes85_periodo,DistInvRes85_nulo,DistInvRes85_periodoSistema,DistInvRes85_sist,DistInvRes85_interacao) 
+
+
