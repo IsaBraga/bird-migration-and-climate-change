@@ -24,3 +24,7 @@ reclass<-function(corte, obj_model, shape_rst, cortar){
   
   return(erro)
 }
+
+
+
+Leonardo Ré Jorge e Maraísa Braga
