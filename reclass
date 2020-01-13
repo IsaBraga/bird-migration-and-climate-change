@@ -1,30 +1,35 @@
-##funcao inserida em optimise para otimizar o corte da adequabilidade (menor erro para o modelo de cada espécie)
 
-#para áreas de reprodução
-reclass_rep<-function(corte, obj_model, shape_rst, cortar_rep){
-  obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar_rep)
-  validate<-shape_rst+obj_model
+  ## OTIMIZAR O ERRO DOS MODELOS ##
+
   
-  sensibilidade <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobreprevisao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-sensibilidade)*2+sobreprevisao
+#funcao inserida em optimise para calcular o threshold e minimizar o Erro do modelo
+
+##PARA AS ÁREAS DE REPORDUÇÃO (as áreas serão projetadas no futuro apenas no continente onde a área de reprodução ocorre no presente: América Central e do Norte ou América do Sul)
+reclass_rep<-function(threshold, obj_model, shape_rst, cortar_rep){
+  obj_model_reclass<-crop(reclassify(obj_model, c(0,threshold,0,threshold,+Inf,1))*2, cortar_rep)
+  validate_reclassREP<-shape_rst+obj_model_reclass #valores de a=3, b=2, c=1 e d=0
+  
+  sensibilidade <-  sum((validate_reclassREP@data@values)==3, na.rm=T)/sum((shape_rst@data@values==1), na.rm=T)  ##a/(a+c)
+  sobreprevisao <- sum((validate_reclassREP@data@values)==2, na.rm=T)/sum(sum((validate_reclassREP@data@values)==3, na.rm=T),sum((validate_reclassREP@data@values)==2, na.rm=T)) ##b/(a+b)
+  erro <- (1-sensibilidade) + sobreprevisao
+ 
+  return(erro)
+}
+
+
+##RECLASS PARA AS DEMAIS AREAS (as áreas serão projetadas no futuro em toda a América)
+
+reclass<-function(threshold, obj_model, shape_rst, cortar){
+  obj_model_reclass<-crop(reclassify(obj_model, c(0,threshold,0,threshold,+Inf,1))*2, cortar)
+  validate_reclass<-shape_rst+obj_model_reclass #valores de a=3, b=2, c=1 e d=0
+  
+  sensibilidade <-  sum((validate_reclass@data@values)==3, na.rm=T)/sum((shape_rst@data@values==1), na.rm=T)  ##a/(a+c)
+  sobrepredicao <- sum((validate_reclass@data@values)==2, na.rm=T)/sum(sum((validate_reclass@data@values)==3, na.rm=T),sum((validate_reclass@data@values)==2, na.rm=T)) ##b/(a+b)
+  
+  erro <- (1-sensibilidade) + sobrepredicao
   
   return(erro)
 }
 
 
-#para áreas de invernada e residência
-reclass<-function(corte, obj_model, shape_rst, cortar){
-  obj_model<-crop(reclassify(obj_model, c(0,corte,0,corte,+Inf,1))*2, cortar)
-  validate<-shape_rst+obj_model
-  
-  sensibilidade <-  length(which(validate@data@values==3))/length(which(shape_rst@data@values==1))
-  sobreprevisao <- length(which(validate@data@values==2))/length(which(shape_rst@data@values==1))
-  erro <- (1-sensibilidade)*2+sobreprevisao
-  
-  return(erro)
-}
-
-
-
-Leonardo Ré Jorge e Maraísa Braga
+##Maraísa Braga e Sara Varela
