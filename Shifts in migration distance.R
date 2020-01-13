@@ -57,7 +57,7 @@ for(j in 1:nrow(DistInvRep85)){
   DistInvRep85[j,1] <- distVincentyEllipsoid(p1=midInv_85[j,1:2], p2=midRep_85[j,1:2])/1000
 }
 
-##**retirar a spp Sayornis saya pois ela tá zuando o barraco. tem outliers nas áreas de residência e de invernada no deslocamento de seus centroides.Retirar a spp Empidonax minimus, tem outlier no deslocamento do centroide de invernada.
+##**retirar a spp Sayornis saya pois ela tem outliers nas áreas de residência e de invernada no deslocamento de seus centroides.Retirar a spp Empidonax minimus, tem outlier no deslocamento do centroide de invernada.
 
 DistInvRep85[63,]<-NA
 DistInvRes0k[63,]<-NA
